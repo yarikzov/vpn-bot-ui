@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPN Web3 Dashboard</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .neon-text {
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        }
+    </style>
+</head>
+<body class="p-4 min-h-screen flex flex-col items-center">
+
+    <div class="w-full max-w-md flex justify-between items-center mb-6">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">🛡️</div>
+            <h1 class="text-xl font-bold neon-text">Secure VPN</h1>
+        </div>
+        <div id="user-badge" class="px-3 py-1 rounded-full glass text-xs text-gray-300">
+            User
+        </div>
+    </div>
+
+    <div class="w-full max-w-md glass rounded-2xl p-6 mb-6 shadow-lg relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500 opacity-10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+        
+        <h2 class="text-gray-400 text-sm mb-1">SUBSCRIPTION STATUS</h2>
+        <div id="status-display" class="text-2xl font-bold text-red-400 mb-4">Inactive 🔴</div>
+        
+        <button onclick="requestConfig()" class="w-full py-3 rounded-xl bg-gray-700 text-gray-300 font-medium hover:bg-gray-600 transition flex items-center justify-center gap-2 disabled:opacity-50" id="connect-btn">
+            <span>🚀</span> Get Connection Key
+        </button>
+    </div>
+
+    <div class="w-full max-w-md mb-20">
+        <h3 class="text-lg font-bold mb-4 px-1">Select Plan</h3>
+        <div class="space-y-3" id="tariffs-container">
+            <div class="glass rounded-xl p-4 flex justify-between items-center cursor-pointer hover:bg-slate-800 transition border border-transparent hover:border-blue-500/30" onclick="selectTariff(1)">
+                <div>
+                    <div class="font-bold text-lg">1 Month</div>
+                    <div class="text-xs text-gray-400">High speed, Unlimited data</div>
+                </div>
+                <div class="text-right">
+                    <div class="font-bold text-blue-400">1.0 USDT</div>
+                    <button class="mt-1 text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded" onclick="buy(1, '1 Month')">Buy</button>
+                </div>
+            </div>
+             <div class="glass rounded-xl p-4 flex justify-between items-center cursor-pointer hover:bg-slate-800 transition border border-transparent hover:border-purple-500/30" onclick="selectTariff(2)">
+                <div>
+                    <div class="font-bold text-lg">3 Months</div>
+                    <div class="text-xs text-gray-400">Save 15%</div>
+                </div>
+                <div class="text-right">
+                    <div class="font-bold text-purple-400">2.5 USDT</div>
+                    <button class="mt-1 text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded" onclick="buy(2, '3 Months')">Buy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Развернуть на весь экран
+
+        // Инициализация пользователя
+        const user = tg.initDataUnsafe.user;
+        if (user) {
+            document.getElementById('user-badge').innerText = `@${user.username || user.first_name}`;
+        }
+
+        // --- Логика ---
+
+        // 1. Покупка тарифа
+        function buy(id, name) {
+            tg.HapticFeedback.impactOccurred('medium');
+            
+            // Отправляем данные боту
+            const data = JSON.stringify({
+                action: 'buy_tariff',
+                id: id,
+                name: name
+            });
+            tg.sendData(data);
+            tg.close(); // Закрываем WebApp чтобы пользователь увидел инвойс в чате
+        }
+
+        // 2. Запрос конфига
+        function requestConfig() {
+            tg.HapticFeedback.impactOccurred('light');
+            const data = JSON.stringify({
+                action: 'get_config'
+            });
+            tg.sendData(data);
+            tg.close();
+        }
+
+        // В реальном приложении здесь был бы AJAX запрос к вашему API
+        // чтобы получить реальный статус подписки пользователя.
+        // Поскольку у нас бот на Python без публичного API эндпоинта для фронтенда,
+        // мы полагаемся на то, что пользователь нажимает кнопки, а бот отвечает в чате.
+        
+        // Визуальная заглушка (можно передавать параметры через URL при открытии)
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get('status'); // active | inactive
+        
+        if(status === 'active') {
+            const statusDiv = document.getElementById('status-display');
+            statusDiv.innerText = "Active ✅";
+            statusDiv.className = "text-2xl font-bold text-green-400 mb-4";
+            document.getElementById('connect-btn').className = "w-full py-3 rounded-xl btn-gradient text-white font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition flex items-center justify-center gap-2";
+        }
+
+    </script>
+</body>
+</html>
