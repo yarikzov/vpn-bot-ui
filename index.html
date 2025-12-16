@@ -1,248 +1,253 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Web3 VPN</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPN Web3 Dashboard</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #0b0f19;
-            color: white;
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
+            background-color: #0f172a;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
-        /* Анимация фона */
-        .bg-gradient-glow {
-            background: radial-gradient(circle at 50% -20%, #4f46e5 0%, transparent 40%),
-                        radial-gradient(circle at 100% 50%, #ec4899 0%, transparent 30%);
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-        }
-        /* Стекломорфизм */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
         }
-        /* Неоновая кнопка */
-        .neon-btn {
-            background: linear-gradient(90deg, #4f46e5, #9333ea);
-            box-shadow: 0 0 20px rgba(79, 70, 229, 0.5);
-            transition: all 0.3s ease;
+        .neon-text {
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
         }
-        .neon-btn:active { transform: scale(0.95); }
-        
-        /* Табы */
-        .tab-content { display: none; animation: fadeIn 0.4s ease; }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Навигация */
-        .nav-item.active { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
-        .nav-item { color: #6b7280; transition: color 0.3s; }
+        .btn-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        }
     </style>
 </head>
-<body class="pb-24">
+<body class="p-4 min-h-screen flex flex-col items-center">
 
-    <div class="bg-gradient-glow"></div>
-
-    <div class="p-6 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                <i class="fas fa-shield-alt text-white text-lg"></i>
-            </div>
-            <div>
-                <h1 class="font-bold text-lg">Web3 VPN</h1>
-                <p class="text-xs text-gray-400">Secure & Fast</p>
-            </div>
+    <div class="w-full max-w-md flex justify-between items-center mb-6">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">🛡️</div>
+            <h1 class="text-xl font-bold neon-text">Secure VPN</h1>
         </div>
-        <div class="glass-card px-3 py-1 text-xs text-green-400 font-mono">
-            ● ONLINE
+        <div id="user-badge" class="px-3 py-1 rounded-full glass text-xs text-gray-300">
+            User
         </div>
     </div>
 
-    <div id="tab-home" class="tab-content active p-6 pt-2">
-        <div class="glass-card p-8 text-center relative overflow-hidden mb-6">
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent"></div>
-            
-            <h2 class="text-gray-400 text-sm tracking-wider mb-2">SUBSCRIPTION</h2>
-            <div id="status-text" class="text-3xl font-bold text-white mb-1">Inactive</div>
-            <div id="days-text" class="text-sm text-gray-500 mb-6">No active plan</div>
+    <div class="w-full max-w-md glass rounded-2xl p-6 mb-4 shadow-lg relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500 opacity-10 rounded-full blur-3xl -mr-10 -mt-10"></div>
 
-            <button onclick="requestConfig()" class="neon-btn w-full py-4 rounded-xl font-bold text-white flex items-center justify-center gap-2">
-                <i class="fas fa-power-off"></i> CONNECT
-            </button>
+        <h2 class="text-gray-400 text-sm mb-1">SUBSCRIPTION STATUS</h2>
+        <div id="status-display" class="text-2xl font-bold text-red-400 mb-2">Inactive 🔴</div>
+        <div id="days-left" class="text-sm text-gray-300 mb-4"></div>
+
+        <button onclick="requestConfig()" class="w-full py-3 rounded-xl bg-gray-700 text-gray-300 font-medium hover:bg-gray-600 transition flex items-center justify-center gap-2 disabled:opacity-50" id="connect-btn">
+            <span>🔑</span> Get Connection Key
+        </button>
+    </div>
+
+    <div class="w-full max-w-md grid grid-cols-2 gap-3 mb-6">
+        <div class="glass rounded-xl p-4 text-center">
+            <div class="text-xs text-gray-400 mb-1">BALANCE</div>
+            <div id="user-balance" class="text-lg font-bold text-green-400">0.0 USDT</div>
         </div>
-
-        <div id="trial-card" class="glass-card p-4 flex justify-between items-center border-indigo-500/30 border">
-            <div>
-                <div class="font-bold text-indigo-300">Free Trial</div>
-                <div class="text-xs text-gray-400">Try 24 hours for free</div>
-            </div>
-            <button onclick="activateTrial()" class="bg-indigo-600/20 text-indigo-300 px-4 py-2 rounded-lg text-sm hover:bg-indigo-600/40 transition">
-                Activate
-            </button>
+        <div class="glass rounded-xl p-4 text-center">
+            <div class="text-xs text-gray-400 mb-1">REFERRALS</div>
+            <div id="ref-count" class="text-lg font-bold text-yellow-400">0 Users</div>
         </div>
     </div>
 
-    <div id="tab-plans" class="tab-content p-6 pt-2">
-        <h2 class="text-xl font-bold mb-4">Choose Plan</h2>
-        <div class="space-y-4">
-            <div onclick="buy(2, 30, 2.0, '1 Month')" class="glass-card p-5 cursor-pointer active:scale-95 transition hover:border-indigo-500/50">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="font-bold text-lg">1 Month</h3>
-                    <span class="bg-white/10 px-2 py-1 rounded text-xs">Popular</span>
+    <div class="w-full max-w-md glass rounded-xl p-4 mb-6">
+        <h3 class="text-sm font-bold text-gray-300 mb-2">My Referral Link</h3>
+        <div id="ref-link-display" class="text-xs text-blue-300 bg-slate-800 p-2 rounded truncate cursor-pointer" onclick="copyRefLink()">
+            t.me/web3_vpn_test_bot?start=12345
+        </div>
+        <div id="copy-status" class="text-xs text-green-400 mt-1 hidden">Copied!</div>
+    </div>
+
+
+    <div class="w-full max-w-md mb-20">
+        <h3 class="text-lg font-bold mb-4 px-1">Select Plan</h3>
+        <div class="space-y-3" id="tariffs-container">
+            <div id="trial-container" class="glass rounded-xl p-4 flex justify-between items-center transition border border-yellow-500/30">
+                <div>
+                    <div class="font-bold text-lg text-yellow-300">Trial Plan</div>
+                    <div class="text-xs text-gray-400">24 hours free access</div>
                 </div>
-                <div class="text-3xl font-bold mb-1">2.0 <span class="text-sm font-normal text-gray-400">USDT</span></div>
-                <p class="text-xs text-gray-400">High speed, Unlimited data</p>
+                <div class="text-right">
+                    <button class="mt-1 text-xs bg-yellow-500/20 text-yellow-300 px-3 py-1 rounded font-medium" onclick="requestTrial()" id="trial-btn">Activate Free</button>
+                </div>
             </div>
-            <div onclick="buy(3, 90, 5.0, '3 Months')" class="glass-card p-5 cursor-pointer active:scale-95 transition hover:border-pink-500/50 relative">
-                <div class="absolute -right-2 -top-2 bg-pink-500 text-white text-[10px] px-2 py-1 rounded-full font-bold">SAVE 15%</div>
-                <h3 class="font-bold text-lg mb-2">3 Months</h3>
-                <div class="text-3xl font-bold mb-1 text-pink-400">5.0 <span class="text-sm font-normal text-gray-400">USDT</span></div>
-                <p class="text-xs text-gray-400">Best value for season</p>
+            
+            <div class="glass rounded-xl p-4 flex justify-between items-center cursor-pointer hover:bg-slate-800 transition border border-transparent hover:border-blue-500/30">
+                <div>
+                    <div class="font-bold text-lg">1 Month</div>
+                    <div class="text-xs text-gray-400">High speed, Unlimited data</div>
+                </div>
+                <div class="text-right">
+                    <div class="font-bold text-blue-400">2.0 USDT</div>
+                    <button class="mt-1 text-xs bg-blue-500/20 text-blue-300 px-3 py-1 rounded font-medium" onclick="buy(2, '1 Month', 2.0)">Buy</button>
+                </div>
             </div>
-        </div>
-    </div>
-
-    <div id="tab-profile" class="tab-content p-6 pt-2">
-        <div class="flex flex-col items-center mb-8">
-            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-pink-500 p-1 mb-3">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg" class="w-full h-full rounded-full bg-black object-cover">
+             <div class="glass rounded-xl p-4 flex justify-between items-center cursor-pointer hover:bg-slate-800 transition border border-transparent hover:border-purple-500/30">
+                <div>
+                    <div class="font-bold text-lg">3 Months</div>
+                    <div class="text-xs text-gray-400">Save 15% (5.0 USDT)</div>
+                </div>
+                <div class="text-right">
+                    <div class="font-bold text-purple-400">5.0 USDT</div>
+                    <button class="mt-1 text-xs bg-purple-500/20 text-purple-300 px-3 py-1 rounded font-medium" onclick="buy(3, '3 Months', 5.0)">Buy</button>
+                </div>
             </div>
-            <div id="username" class="font-bold text-xl">User</div>
-            <div class="text-xs text-gray-400">ID: <span id="userid">...</span></div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4 mb-6">
-            <div class="glass-card p-4 text-center">
-                <div id="ref-count" class="text-2xl font-bold text-indigo-400">0</div>
-                <div class="text-xs text-gray-400">Referrals</div>
+             <div class="glass rounded-xl p-4 flex justify-between items-center cursor-pointer hover:bg-slate-800 transition border border-transparent hover:border-green-500/30">
+                <div>
+                    <div class="font-bold text-lg">1 Year</div>
+                    <div class="text-xs text-gray-400">Save 30% (15.0 USDT)</div>
+                </div>
+                <div class="text-right">
+                    <div class="font-bold text-green-400">15.0 USDT</div>
+                    <button class="mt-1 text-xs bg-green-500/20 text-green-300 px-3 py-1 rounded font-medium" onclick="buy(4, '1 Year', 15.0)">Buy</button>
+                </div>
             </div>
-            <div class="glass-card p-4 text-center">
-                <div id="balance" class="text-2xl font-bold text-green-400">0.0 $</div>
-                <div class="text-xs text-gray-400">Balance</div>
-            </div>
-        </div>
-
-        <div class="glass-card p-4">
-            <div class="text-xs text-gray-400 mb-2">YOUR INVITE LINK</div>
-            <div class="flex gap-2">
-                <input id="ref-link" type="text" readonly class="w-full bg-black/30 rounded px-3 py-2 text-sm text-gray-300 outline-none" value="...">
-                <button onclick="copyLink()" class="bg-indigo-600 px-3 py-2 rounded text-white"><i class="fas fa-copy"></i></button>
-            </div>
-            <p class="text-[10px] text-gray-500 mt-2">Invite friends and get 10% from their payments.</p>
-        </div>
-    </div>
-
-    <div class="fixed bottom-0 left-0 w-full glass-card border-t border-white/10 rounded-b-none pb-safe">
-        <div class="flex justify-around p-4 pb-6">
-            <button onclick="switchTab('home')" class="nav-item active flex flex-col items-center gap-1" id="nav-home">
-                <i class="fas fa-home text-xl"></i>
-                <span class="text-[10px]">VPN</span>
-            </button>
-            <button onclick="switchTab('plans')" class="nav-item flex flex-col items-center gap-1" id="nav-plans">
-                <i class="fas fa-bolt text-xl"></i>
-                <span class="text-[10px]">Plans</span>
-            </button>
-            <button onclick="switchTab('profile')" class="nav-item flex flex-col items-center gap-1" id="nav-profile">
-                <i class="fas fa-user text-xl"></i>
-                <span class="text-[10px]">Profile</span>
-            </button>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.enableClosingConfirmation();
-
-        // Парсинг данных из URL (от бота)
-        const urlParams = new URLSearchParams(window.location.search);
-        let userData = {};
+        tg.expand(); 
         
-        try {
-            const rawData = urlParams.get('data');
-            if(rawData) {
-                userData = JSON.parse(decodeURIComponent(rawData));
-            }
-        } catch(e) { console.error("Error parsing data", e); }
+        let userData = {};
 
-        // Инициализация интерфейса
-        document.addEventListener('DOMContentLoaded', () => {
-            const user = tg.initDataUnsafe.user || {id: 0, first_name: 'Guest'};
+        // --- Инициализация и Парсинг Данных ---
+        
+        function parseUrlData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const dataParam = urlParams.get('data'); 
             
-            // Заполнение профиля
-            document.getElementById('username').innerText = user.first_name;
-            document.getElementById('userid').innerText = userData.uid || user.id;
-            document.getElementById('ref-count').innerText = userData.refs || 0;
-            document.getElementById('balance').innerText = (userData.balance || 0).toFixed(1) + " $";
+            if (dataParam) {
+                try {
+                    // Декодируем и парсим JSON
+                    const decodedData = decodeURIComponent(dataParam);
+                    userData = JSON.parse(decodedData);
+                } catch (e) {
+                    console.error("Error parsing user data:", e);
+                    return;
+                }
+            } else {
+                 console.warn("No data parameter found in URL.");
+            }
+        }
+
+        function updateUI() {
+            // Данные пользователя
+            const user = tg.initDataUnsafe.user;
+            if (user) {
+                document.getElementById('user-badge').innerText = `@${user.username || user.first_name}`;
+            }
+
+            // Данные из URL
+            if (!userData.sub) return;
+            
+            // Статус подписки
+            const statusDiv = document.getElementById('status-display');
+            const daysDiv = document.getElementById('days-left');
+            const connectBtn = document.getElementById('connect-btn');
+            
+            if (userData.sub === 'active') {
+                statusDiv.innerText = "Active ✅";
+                statusDiv.className = "text-2xl font-bold text-green-400 mb-2";
+                daysDiv.innerText = `Expires in ${userData.days} day(s)`;
+                connectBtn.className = "w-full py-3 rounded-xl btn-gradient text-white font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition flex items-center justify-center gap-2";
+                connectBtn.disabled = false;
+            } else {
+                statusDiv.innerText = "Inactive 🔴";
+                statusDiv.className = "text-2xl font-bold text-red-400 mb-2";
+                daysDiv.innerText = `Your subscription has expired.`;
+                connectBtn.className = "w-full py-3 rounded-xl bg-gray-700 text-gray-300 font-medium transition flex items-center justify-center gap-2 disabled:opacity-50";
+                connectBtn.disabled = true;
+            }
+            
+            // Пробный период
+            const trialContainer = document.getElementById('trial-container');
+            if (userData.trial == 1) {
+                trialContainer.style.opacity = '0.5';
+                document.getElementById('trial-btn').innerText = 'Used';
+                document.getElementById('trial-btn').disabled = true;
+            }
+
+            // Баланс и Рефералы
+            document.getElementById('user-balance').innerText = `${userData.balance} USDT`;
+            document.getElementById('ref-count').innerText = `${userData.refs} Users`;
             
             // Реферальная ссылка
-            // ВАЖНО: Замените 'MyVpnBot' на юзернейм вашего бота
-            const botUsername = "MyVpnBot"; 
-            document.getElementById('ref-link').value = `https://t.me/${botUsername}?start=${userData.uid || user.id}`;
-
-            // Статус подписки
-            if (userData.sub === 'active') {
-                document.getElementById('status-text').innerText = "Active 🟢";
-                document.getElementById('status-text').className = "text-3xl font-bold text-green-400 mb-1";
-                document.getElementById('days-text').innerText = `${userData.days} days left`;
-            }
-
-            // Скрыть триал, если использован
-            if (userData.trial == 1) {
-                document.getElementById('trial-card').style.display = 'none';
-            }
-        });
-
-        // Навигация
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.add('active');
-            
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            document.getElementById('nav-' + tabId).classList.add('active');
-            
-            tg.HapticFeedback.selectionChanged();
+            document.getElementById('ref-link-display').innerText = userData.ref_link;
         }
 
-        // Логика кнопок
-        function activateTrial() {
+
+        // --- Логика Кнопок ---
+        
+        // 1. Покупка тарифа
+        function buy(id, name, price) {
             tg.HapticFeedback.impactOccurred('medium');
-            tg.sendData(JSON.stringify({ action: 'trial' }));
-            tg.close();
+
+            // Отправляем данные боту
+            const data = JSON.stringify({
+                action: 'buy',
+                id: id,
+                name: name,
+                price: price
+            });
+            tg.sendData(data);
+            tg.close(); 
         }
 
-        function buy(id, days, price, name) {
-            tg.HapticFeedback.impactOccurred('heavy');
-            tg.sendData(JSON.stringify({ 
-                action: 'buy', 
-                id: id, 
-                days: days, 
-                price: price, 
-                name: name 
-            }));
-            tg.close();
-        }
-
-        function requestConfig() {
+        // 2. Активация триала
+        function requestTrial() {
+            if (userData.trial == 1) return; 
+            
             tg.HapticFeedback.impactOccurred('light');
-            tg.sendData(JSON.stringify({ action: 'get_config' }));
+            const data = JSON.stringify({
+                action: 'trial'
+            });
+            tg.sendData(data);
             tg.close();
         }
 
-        function copyLink() {
-            const input = document.getElementById('ref-link');
-            input.select();
-            document.execCommand('copy');
-            tg.HapticFeedback.notificationOccurred('success');
-            alert('Link copied!');
+        // 3. Запрос конфига
+        function requestConfig() {
+            if (userData.sub !== 'active') return; 
+
+            tg.HapticFeedback.impactOccurred('light');
+            const data = JSON.stringify({
+                action: 'get_config'
+            });
+            tg.sendData(data);
+            tg.close();
         }
+        
+        // 4. Копирование реферальной ссылки
+        function copyRefLink() {
+             const link = document.getElementById('ref-link-display').innerText;
+             navigator.clipboard.writeText(link).then(() => {
+                const statusDiv = document.getElementById('copy-status');
+                statusDiv.style.display = 'block';
+                tg.HapticFeedback.notificationOccurred('success');
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 1500);
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+            });
+        }
+
+
+        // Запуск
+        parseUrlData();
+        updateUI();
     </script>
 </body>
 </html>
