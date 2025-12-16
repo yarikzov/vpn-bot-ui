@@ -2,614 +2,291 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MrdotaVPN Web App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MrdotaVPN</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --primary-color: #007bff;
-            --secondary-color: #00bcd4;
-            --background-color: #1a1a2e;
-            --card-background: #232946;
-            --text-color: #ffffff;
-            --light-text: #b8c1ec;
-            --success-color: #28a745;
-            --danger-color: #dc3545;
-            --font-family: 'Arial', sans-serif;
-        }
-
-        body {
-            background-color: var(--background-color);
-            color: var(--text-color);
-            font-family: var(--font-family);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .container {
-            width: 95%;
-            max-width: 450px;
-            padding: 15px 0;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 10px 0;
-            border-bottom: 2px solid var(--card-background);
-        }
-
-        .header h1 {
-            color: var(--secondary-color);
-            margin: 5px 0;
-            font-size: 1.5em;
-        }
-
-        .tabs {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-            background: var(--card-background);
-            border-radius: 10px;
-            padding: 5px;
-        }
-
-        .tab-button {
-            background: none;
-            border: none;
-            color: var(--light-text);
-            padding: 10px 15px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: all 0.3s ease;
-            border-radius: 8px;
-            flex-grow: 1;
-            text-align: center;
-        }
-
-        .tab-button.active {
-            background-color: var(--primary-color);
-            color: var(--text-color);
-            font-weight: bold;
-        }
-
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.5s;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .card {
-            background: var(--card-background);
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .card h3 {
-            border-bottom: 2px solid var(--background-color);
-            padding-bottom: 10px;
-            margin-top: 0;
-            color: var(--secondary-color);
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px dashed #3e4465;
-        }
-
-        .info-row:last-child {
-            border-bottom: none;
-        }
-
-        .info-label {
-            color: var(--light-text);
-        }
-
-        .info-value {
-            font-weight: bold;
-        }
-
-        .button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1em;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: background-color 0.3s;
-            font-weight: bold;
-        }
-
-        .button-primary {
-            background-color: var(--primary-color);
-            color: var(--text-color);
-        }
-
-        .button-primary:hover {
-            background-color: #0056b3;
-        }
-
-        .ref-box {
-            background: #3e4465;
-            padding: 10px;
-            border-radius: 8px;
-            word-break: break-all;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .copy-button {
-            background: var(--secondary-color);
-            color: var(--background-color);
-            border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-left: 10px;
-            font-weight: bold;
-        }
-
-        .copy-button:active {
-            background-color: #00a0b2;
-        }
-
-        .tariff-item {
-            border: 1px solid var(--primary-color);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .tariff-details h4 {
-            margin: 0 0 5px 0;
-            color: var(--primary-color);
-        }
-        
-        .tariff-details p {
-            margin: 0;
-            font-size: 0.9em;
-            color: var(--light-text);
-        }
-
-        .buy-button {
-            background-color: var(--success-color);
-            color: var(--text-color);
-            border: none;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .buy-button:active {
-            background-color: #1e7e34;
-        }
-
-        .alert {
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .alert-success {
-            background-color: var(--success-color);
-        }
-
-        .alert-danger {
-            background-color: var(--danger-color);
-        }
-
-        /* Crypto Rates Section */
-        .crypto-rates-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-        }
-
-        .crypto-card {
-            background: #3e4465;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .crypto-card h4 {
-            margin: 0 0 5px 0;
-            color: var(--secondary-color);
-        }
-
-        .crypto-price {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .crypto-change {
-            font-size: 0.9em;
-        }
-
-        .change-up {
-            color: var(--success-color);
-        }
-
-        .change-down {
-            color: var(--danger-color);
-        }
-
-        .loader {
-            border: 4px solid var(--card-background);
-            border-top: 4px solid var(--primary-color);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 2s linear infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 20px; }
+        .nav-item.active { color: #60a5fa; }
+        .page { display: none; opacity: 0; transition: opacity 0.3s; }
+        .page.active { display: block; opacity: 1; }
+        .avatar-glow { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>MrdotaVPN Web3 Profile</h1>
-            <p id="telegram-info">Загрузка данных...</p>
+<body class="pb-24 select-none">
+
+    <div class="px-6 pt-6 pb-2 flex justify-between items-center z-10">
+        <div class="flex items-center gap-2">
+            <i class="fas fa-shield-alt text-blue-500 text-2xl"></i>
+            <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">MrdotaVPN</h1>
         </div>
-
-        <div class="tabs">
-            <button class="tab-button active" onclick="openTab('profile')">👤 Профиль</button>
-            <button class="tab-button" onclick="openTab('tariffs')">💳 Оплата</button>
-            <button class="tab-button" onclick="openTab('referrals')">🤝 Рефералы</button>
-            <button class="tab-button" onclick="openTab('crypto')">📈 Крипта</button>
-        </div>
-
-        <div id="profile" class="tab-content active">
-            <div class="card">
-                <h3>Аккаунт</h3>
-                <div class="info-row">
-                    <span class="info-label">Имя пользователя:</span>
-                    <span class="info-value" id="profile-username">...</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">ID Telegram:</span>
-                    <span class="info-value" id="profile-id">...</span>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>Подписка</h3>
-                <div class="info-row">
-                    <span class="info-label">Статус:</span>
-                    <span class="info-value" id="profile-sub-end">...</span>
-                </div>
-                <button class="button button-primary" onclick="requestVPN()">🔑 Получить/Обновить VPN</button>
-            </div>
-
-            <div class="card">
-                <h3>Баланс и Рефералы</h3>
-                <div class="info-row">
-                    <span class="info-label">Баланс (USDT):</span>
-                    <span class="info-value" id="profile-balance">...</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Всего рефералов:</span>
-                    <span class="info-value" id="profile-referrals">...</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Доход с рефералов:</span>
-                    <span class="info-value" id="profile-earnings">...</span>
-                </div>
-            </div>
-        </div>
-
-        <div id="tariffs" class="tab-content">
-            <div class="card">
-                <h3>Выберите тариф</h3>
-                <div id="tariffs-list">
-                    <div class="loader"></div>
-                </div>
-                <p style="margin-top: 20px; text-align: center; color: var(--light-text);">
-                    Оплата производится через Crypto Bot (USDT).
-                </p>
-            </div>
-        </div>
-        
-        <div id="referrals" class="tab-content">
-            <div class="card">
-                <h3>Моя реферальная ссылка</h3>
-                <p style="color: var(--light-text);">Поделитесь ссылкой, и получайте 5% от каждой оплаты вашего реферала.</p>
-                <div class="ref-box">
-                    <span id="ref-link-text">Загрузка...</span>
-                    <button class="copy-button" onclick="copyRefLink()">🔗 Копировать</button>
-                </div>
-                
-                <div class="info-row">
-                    <span class="info-label">Приглашено пользователей:</span>
-                    <span class="info-value" id="ref-count">...</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Заработано (USDT):</span>
-                    <span class="info-value" id="ref-earned">...</span>
-                </div>
-            </div>
-        </div>
-
-        <div id="crypto" class="tab-content">
-            <div class="card">
-                <h3>Курсы криптовалют (USD)</h3>
-                <div id="crypto-rates-content" class="crypto-rates-grid">
-                    <div class="loader"></div>
-                </div>
-                <p style="margin-top: 20px; font-size: 0.8em; color: var(--light-text); text-align: center;">
-                    Данные обновляются каждые 60 секунд. Источник: CoinGecko.
-                </p>
-            </div>
+        <div class="bg-green-500/10 border border-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-mono flex items-center gap-1">
+            <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div> Online
         </div>
     </div>
-    
+
+    <div class="p-5">
+
+        <div id="page-home" class="page active">
+            <div class="glass p-6 mb-6 text-center relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+                
+                <div class="relative inline-block mb-3">
+                    <img id="user-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="w-20 h-20 rounded-full border-4 border-[#0f172a] avatar-glow mx-auto object-cover">
+                    <div class="absolute bottom-0 right-0 bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded-full border-2 border-[#0f172a]" id="user-id">ID: ...</div>
+                </div>
+                
+                <h2 class="text-xl font-bold text-white mb-1" id="user-name">Загрузка...</h2>
+                <p class="text-gray-400 text-sm mb-4">С нами уже <span id="user-days" class="text-blue-400 font-bold">0</span> дней</p>
+
+                <div class="flex justify-between items-center bg-gray-900/50 p-4 rounded-xl">
+                    <div class="text-left">
+                        <p class="text-xs text-gray-500">Подписка до</p>
+                        <p class="text-sm font-bold text-white" id="sub-status">...</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs text-gray-500">Баланс</p>
+                        <p class="text-sm font-bold text-green-400" id="user-balance">0.0 $</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-lg font-bold mb-3 text-gray-200">Тарифы</h3>
+            <div class="space-y-3">
+                <div class="glass p-4 flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 text-xl"><i class="fas fa-bolt"></i></div>
+                        <div>
+                            <div class="font-bold">1 Месяц</div>
+                            <div class="text-xs text-gray-400">Быстрый старт</div>
+                        </div>
+                    </div>
+                    <button onclick="buy(2)" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-xl text-sm font-bold transition">2 USDT</button>
+                </div>
+
+                <div class="glass p-4 flex justify-between items-center border border-purple-500/30 relative">
+                    <div class="absolute -top-2 -right-2 bg-purple-600 text-[10px] px-2 py-0.5 rounded text-white">Best</div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400 text-xl"><i class="fas fa-star"></i></div>
+                        <div>
+                            <div class="font-bold">3 Месяца</div>
+                            <div class="text-xs text-gray-400">Выгода 20%</div>
+                        </div>
+                    </div>
+                    <button onclick="buy(5)" class="bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded-xl text-sm font-bold transition">5 USDT</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-crypto" class="page">
+            <h2 class="text-2xl font-bold mb-4">Рынок <span class="text-xs bg-gray-700 px-2 py-1 rounded align-middle">Live</span></h2>
+            <div id="crypto-list" class="space-y-3">
+                <div class="text-center mt-10 text-gray-500"><i class="fas fa-circle-notch fa-spin text-2xl"></i><br>Загрузка данных...</div>
+            </div>
+        </div>
+
+        <div id="page-ref" class="page">
+            <div class="glass p-6 text-center">
+                <div class="w-16 h-16 bg-gradient-to-tr from-green-400 to-blue-500 rounded-full mx-auto flex items-center justify-center text-3xl mb-4 shadow-lg shadow-green-500/20">
+                    🤝
+                </div>
+                <h2 class="text-2xl font-bold mb-2">Зарабатывай 5%</h2>
+                <p class="text-gray-400 text-sm mb-6">Приглашай друзей в MrdotaVPN и получай 5% от каждой их покупки вечно.</p>
+                
+                <div class="bg-gray-900/80 p-3 rounded-xl border border-dashed border-gray-600 flex items-center justify-between mb-6">
+                    <div class="truncate text-xs text-gray-400 w-full text-left mr-2" id="ref-link">loading...</div>
+                    <button onclick="copyRef()" class="text-blue-400 text-lg hover:text-white"><i class="far fa-copy"></i></button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-gray-800/50 p-4 rounded-xl">
+                        <div class="text-2xl font-bold text-white" id="ref-count">0</div>
+                        <div class="text-xs text-gray-500">Приглашено</div>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-xl">
+                        <div class="text-2xl font-bold text-green-400" id="ref-earn">0 $</div>
+                        <div class="text-xs text-gray-500">Доход</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="fixed bottom-4 left-4 right-4 h-16 glass flex justify-around items-center z-50 shadow-2xl">
+        <button onclick="nav('home', this)" class="nav-item active flex flex-col items-center gap-1 text-blue-500 w-1/3 transition">
+            <i class="fas fa-home text-xl"></i>
+            <span class="text-[10px] font-medium">Профиль</span>
+        </button>
+        <button onclick="nav('crypto', this)" class="nav-item flex flex-col items-center gap-1 text-gray-500 w-1/3 transition">
+            <i class="fas fa-chart-line text-xl"></i>
+            <span class="text-[10px] font-medium">Крипта</span>
+        </button>
+        <button onclick="nav('ref', this)" class="nav-item flex flex-col items-center gap-1 text-gray-500 w-1/3 transition">
+            <i class="fas fa-users text-xl"></i>
+            <span class="text-[10px] font-medium">Реф</span>
+        </button>
+    </div>
+
     <script>
-        const API_URL = window.location.origin;
-        let userData = {};
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        document.body.style.overflow = 'hidden'; 
+
+        const user = tg.initDataUnsafe?.user;
+        const userId = user?.id || 12345; 
+
+        // UI Setup
+        if(user) {
+            document.getElementById('user-name').innerText = (user.first_name + ' ' + (user.last_name || '')).trim();
+            document.getElementById('user-id').innerText = 'ID: ' + user.id;
+            if(user.photo_url) document.getElementById('user-avatar').src = user.photo_url;
+        }
+
+        // --- NAVIGATION ---
+        function nav(tab, button) {
+            document.querySelectorAll('.page').forEach(el => {
+                el.classList.remove('active');
+                setTimeout(() => { if(!el.classList.contains('active')) el.style.display='none'; }, 300);
+            });
+            const target = document.getElementById('page-' + tab);
+            target.style.display = 'block';
+            setTimeout(() => target.classList.add('active'), 10);
+
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active', 'text-blue-500'));
+            button.classList.add('active', 'text-blue-500');
+
+            if(tab === 'crypto') loadCrypto();
+        }
+
+        // --- API CALLS ---
         
-        // --- Общие функции ---
-
-        function openTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            document.getElementById(tabName).classList.add('active');
-            document.querySelector(`.tab-button[onclick*='${tabName}']`).classList.add('active');
-            
-            // Дополнительная загрузка данных при смене вкладки
-            if (tabName === 'tariffs') loadTariffs();
-            if (tabName === 'crypto') loadCryptoRates();
-            if (tabName === 'referrals') updateReferralTab();
-        }
-
-        function showAlert(message, type = 'success') {
-            const container = document.querySelector('.container');
-            let alertDiv = document.querySelector('.temporary-alert');
-            if (alertDiv) alertDiv.remove();
-
-            alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type} temporary-alert`;
-            alertDiv.textContent = message;
-            
-            container.insertBefore(alertDiv, container.firstChild.nextSibling);
-
-            setTimeout(() => {
-                alertDiv.remove();
-            }, 4000);
-        }
-
-        // --- Загрузка данных пользователя ---
-
-        async function loadUserInfo() {
+        async function loadData() {
             try {
-                const initData = window.Telegram.WebApp.initDataUnsafe;
-                const userId = initData.user.id;
-                const username = initData.user.username || initData.user.first_name;
-
-                document.getElementById('telegram-info').textContent = `Пользователь: @${username}`;
-
-                const response = await fetch(`${API_URL}/api/user_info`, {
+                const res = await fetch('/api/user_info', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ user_id: userId })
                 });
-
-                const data = await response.json();
+                const data = await res.json();
                 
-                if (data.success) {
-                    userData = { ...data, userId, username };
-                    updateProfileTab(data);
-                    updateReferralTab();
-                } else {
-                    showAlert(data.message, 'danger');
-                }
-            } catch (error) {
-                console.error("Error fetching user info:", error);
-                showAlert('❌ Ошибка загрузки данных пользователя.', 'danger');
-            }
-        }
-
-        function updateProfileTab(data) {
-            document.getElementById('profile-username').textContent = userData.username;
-            document.getElementById('profile-id').textContent = userData.userId;
-            document.getElementById('profile-balance').textContent = `${parseFloat(data.balance).toFixed(2)} USDT`;
-            document.getElementById('profile-referrals').textContent = data.referrals;
-            document.getElementById('profile-earnings').textContent = `${parseFloat(data.earnings).toFixed(2)} USDT`;
-            
-            const subEnd = document.getElementById('profile-sub-end');
-            if (data.sub_end === 'Нет') {
-                 subEnd.innerHTML = `<span style="color: var(--danger-color); font-weight: bold;">Нет активной</span>`;
-            } else {
-                 subEnd.innerHTML = `<span style="color: var(--success-color); font-weight: bold;">Активна до ${new Date(data.sub_end).toLocaleDateString()}</span>`;
-            }
-        }
-
-        // --- Вкладка Тарифы ---
-
-        async function loadTariffs() {
-            const listDiv = document.getElementById('tariffs-list');
-            listDiv.innerHTML = '<div class="loader"></div>';
-            
-            try {
-                const response = await fetch(`${API_URL}/api/tariffs`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    listDiv.innerHTML = '';
-                    data.tariffs.forEach(tariff => {
-                        const item = document.createElement('div');
-                        item.className = 'tariff-item';
-                        item.innerHTML = `
-                            <div class="tariff-details">
-                                <h4>${tariff.name}</h4>
-                                <p>${tariff.days} дней</p>
-                            </div>
-                            <button class="buy-button" onclick="createPayment(${tariff.id}, '${tariff.price}', '${tariff.currency}')">
-                                Купить за ${tariff.price} ${tariff.currency}
-                            </button>
-                        `;
-                        listDiv.appendChild(item);
-                    });
-                } else {
-                    listDiv.innerHTML = `<p style="color: var(--danger-color);">❌ Не удалось загрузить тарифы.</p>`;
-                }
-            } catch (error) {
-                console.error("Error loading tariffs:", error);
-                listDiv.innerHTML = `<p style="color: var(--danger-color);">❌ Ошибка сети при загрузке тарифов.</p>`;
-            }
-        }
-
-        async function createPayment(tariffId, price, currency) {
-            if (!userData.userId) {
-                showAlert('❌ Данные пользователя не загружены. Попробуйте перезапустить Web App.', 'danger');
-                return;
-            }
-
-            showAlert(`🔄 Создание счета для тарифа ID ${tariffId}...`, 'primary');
-
-            try {
-                const response = await fetch(`${API_URL}/api/create_payment`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: userData.userId, tariff_id: tariffId, price: price })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showAlert(`✅ Счет создан! Ожидайте подтверждения в Telegram.`, 'success');
+                if(data.success) {
+                    document.getElementById('user-balance').innerText = data.balance.toFixed(2) + ' $';
+                    document.getElementById('sub-status').innerText = data.sub_end;
+                    document.getElementById('user-days').innerText = data.days_with_us;
                     
-                    // Закрываем Web App и отправляем пользователя к счету в CryptoBot
-                    window.Telegram.WebApp.openTelegramLink(data.url);
-                } else {
-                    showAlert(`❌ Ошибка оплаты: ${data.message || 'Неизвестная ошибка CryptoBot.'}`, 'danger');
-                }
-
-            } catch (error) {
-                console.error("Payment error:", error);
-                showAlert('❌ Ошибка сети при создании платежа.', 'danger');
-            }
-        }
-        
-        // --- Вкладка Рефералы ---
-        
-        function updateReferralTab() {
-             if (userData.ref_link) {
-                document.getElementById('ref-link-text').textContent = userData.ref_link;
-                document.getElementById('ref-count').textContent = userData.referrals;
-                document.getElementById('ref-earned').textContent = `${parseFloat(userData.earnings).toFixed(2)} USDT`;
-            } else {
-                document.getElementById('ref-link-text').textContent = 'Загрузка...';
-                document.getElementById('ref-count').textContent = '...';
-                document.getElementById('ref-earned').textContent = '...';
-            }
-        }
-
-        function copyRefLink() {
-            const linkText = document.getElementById('ref-link-text').textContent;
-            navigator.clipboard.writeText(linkText).then(() => {
-                showAlert('🔗 Реферальная ссылка скопирована!', 'success');
-            }).catch(err => {
-                console.error('Ошибка копирования:', err);
-                showAlert('❌ Не удалось скопировать ссылку. Попробуйте вручную.', 'danger');
-            });
-        }
-        
-        function requestVPN() {
-            // Отправляем команду или открываем меню в боте для получения конфига
-            window.Telegram.WebApp.sendData('get_vpn_config');
-            showAlert('🔑 Запрос отправлен. Проверьте сообщения бота.', 'primary');
-        }
-
-        // --- Вкладка Крипта ---
-
-        async function loadCryptoRates() {
-            const contentDiv = document.getElementById('crypto-rates-content');
-            
-            try {
-                const response = await fetch(`${API_URL}/api/crypto_rates`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    contentDiv.innerHTML = '';
-                    const rates = data.rates;
+                    document.getElementById('ref-link').innerText = data.ref_link;
+                    document.getElementById('ref-count').innerText = data.referrals;
+                    document.getElementById('ref-earn').innerText = data.earnings.toFixed(2) + ' $';
                     
-                    for (const [key, value] of Object.entries(rates)) {
-                        const name = key.charAt(0).toUpperCase() + key.slice(1);
-                        const price = value.usd.toFixed(2);
-                        const change = value.usd_24h_change.toFixed(2);
-                        const isUp = change >= 0;
-
-                        const cryptoCard = document.createElement('div');
-                        cryptoCard.className = 'crypto-card';
-                        cryptoCard.innerHTML = `
-                            <h4>${name}</h4>
-                            <div class="crypto-price">$${price}</div>
-                            <div class="crypto-change ${isUp ? 'change-up' : 'change-down'}">
-                                ${isUp ? '▲' : '▼'} ${change}% (24ч)
-                            </div>
-                        `;
-                        contentDiv.appendChild(cryptoCard);
+                    if(data.sub_end !== "Не активна") {
+                        document.getElementById('sub-status').classList.add('text-green-400');
                     }
-                } else {
-                    contentDiv.innerHTML = `<p style="color: var(--danger-color);">❌ Не удалось загрузить курсы.</p>`;
                 }
-            } catch (error) {
-                console.error("Error loading crypto rates:", error);
-                contentDiv.innerHTML = `<p style="color: var(--danger-color);">❌ Ошибка сети при загрузке курсов.</p>`;
+            } catch(e) { console.error("Load error:", e); }
+        }
+
+        async function buy(price) {
+            tg.MainButton.setText(`Оплатить ${price} USDT`);
+            tg.MainButton.show();
+            
+            // Удаляем старый обработчик, чтобы избежать дублирования
+            if (tg.MainButton.custom_event_handler) {
+                tg.MainButton.offClick(tg.MainButton.custom_event_handler);
+            }
+
+            // Новый обработчик
+            const handler = async () => {
+                tg.MainButton.showProgress();
+                try {
+                    const res = await fetch('/api/create_payment', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ user_id: userId, price: price })
+                    });
+                    const data = await res.json();
+                    
+                    if(data.success) {
+                        tg.openTelegramLink(data.url);
+                    } else {
+                        // Показываем детальную ошибку из бекенда
+                        tg.showAlert(`❌ Ошибка оплаты: ${data.message || 'Неизвестная ошибка'}`);
+                    }
+                } catch(e) { tg.showAlert("Ошибка сети"); }
+                
+                tg.MainButton.hideProgress();
+                tg.MainButton.hide();
+                tg.MainButton.offClick(handler);
+            };
+            
+            tg.MainButton.onClick(handler);
+            tg.MainButton.custom_event_handler = handler;
+        }
+
+        // --- ИСПРАВЛЕННЫЙ ЗАГРУЗЧИК КРИПТЫ ЧЕРЕЗ БЕКЕНД ---
+        async function loadCrypto() {
+            const list = document.getElementById('crypto-list');
+            list.innerHTML = `<div class="text-center mt-10 text-gray-500"><i class="fas fa-circle-notch fa-spin text-2xl"></i><br>Загрузка данных...</div>`;
+            
+            try {
+                // Запрос к нашему серверу, который кэширует данные
+                const res = await fetch('/api/crypto_rates'); 
+                const json_data = await res.json();
+                
+                if (!json_data.success) {
+                    throw new Error(json_data.message || "Failed to fetch from backend.");
+                }
+                
+                const data = json_data.rates;
+
+                const coins = [
+                    {id: 'bitcoin', name: 'Bitcoin', sym: 'BTC', img: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'},
+                    {id: 'ethereum', name: 'Ethereum', sym: 'ETH', img: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png'},
+                    {id: 'toncoin', name: 'Toncoin', sym: 'TON', img: 'https://assets.coingecko.com/coins/images/17980/small/ton_symbol.png'}
+                ];
+
+                list.innerHTML = '';
+                coins.forEach(c => {
+                    // Пропускаем, если CoinGecko не вернул данные (например, из-за ошибки)
+                    if (!data[c.id]) return; 
+
+                    const price = data[c.id].usd;
+                    const change = data[c.id].usd_24h_change.toFixed(2);
+                    const color = change >= 0 ? 'text-green-400' : 'text-red-400';
+                    const icon = change >= 0 ? 'fa-caret-up' : 'fa-caret-down';
+
+                    list.innerHTML += `
+                        <div class="glass p-3 flex justify-between items-center">
+                            <div class="flex items-center gap-3">
+                                <img src="${c.img}" class="w-8 h-8 rounded-full">
+                                <div>
+                                    <div class="font-bold text-white">${c.name}</div>
+                                    <div class="text-xs text-gray-400">${c.sym}</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-white">$${price}</div>
+                                <div class="text-xs ${color}"><i class="fas ${icon}"></i> ${change}%</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch(e) {
+                list.innerHTML = `<div class="text-red-400 text-center text-sm p-4">❌ Ошибка: Не удалось загрузить курсы. Попробуйте позже.</div>`;
             }
         }
 
-        // --- Инициализация ---
-
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.expand();
-            loadUserInfo();
-        } else {
-            document.getElementById('telegram-info').textContent = "Запустите в Telegram для полного функционала!";
-            // Для локального тестирования без Telegram:
-            userData.userId = 12345;
-            userData.username = "TestUser";
-            loadUserInfo();
+        function copyRef() {
+            const text = document.getElementById('ref-link').innerText;
+            navigator.clipboard.writeText(text);
+            tg.showPopup({message: 'Ссылка скопирована!'});
         }
 
-        // Загрузка первой вкладки
-        loadTariffs();
+        // Init
+        loadData();
     </script>
 </body>
 </html>
