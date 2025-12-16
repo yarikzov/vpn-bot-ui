@@ -10,22 +10,32 @@ import logging
 from datetime import datetime, timedelta
 import json
 
-# --- НАСТРОЙКИ ---
+# --- КОНФИГУРАЦИЯ ---
 BOT_TOKEN = "8204021215:AAFO3BSZn6e4keyB1gS3AEEA-IylhUWIMro" 
-CRYPTO_PAY_TOKEN = "469810:AAD9NszRx10wOih6coLQc1leKhdwcR6n4SR" 
-# Сюда вставь свой URL от ngrok (https://....)
+CRYPTO_PAY_TOKEN = "469810:AAD9NszRx10wOih6coLQc1leKhdwcR6n4SR" # <--- ПРОВЕРЬТЕ ЭТОТ ТОКЕН!
+# ВАЖНО: Сюда вставь свой HTTPS URL от ngrok или домена
 WEBAPP_URL = "https://ТВОЙ_URL_ОТ_NGROK_ИЛИ_ДОМЕН" 
 ADMIN_ID = 5593856626
 
 bot = telebot.TeleBot(BOT_TOKEN)
 app = Flask(__name__)
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# --- КЭШИРОВАНИЕ КРИПТОВАЛЮТ ---
+CRYPTO_CACHE = {}
+LAST_UPDATE = 0
+CACHE_LIFETIME = 60 # Время жизни кэша в секундах (60 секунд)
 
 # --- БАЗА ДАННЫХ ---
-def init_db():
+def get_db_connection():
+    # Важно: check_same_thread=False для Flask и telebot
     conn = sqlite3.connect('mrdotavpn.db', check_same_thread=False)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def init_db():
+    conn = get_db_connection()
     cur = conn.cursor()
-    # Таблица пользователей
     cur.execute('''CREATE TABLE IF NOT EXISTS users (
         user_id INTEGER PRIMARY KEY,
         username TEXT,
@@ -36,7 +46,6 @@ def init_db():
         subscription_end TEXT,
         reg_date TEXT
     )''')
-    # Таблица платежей
     cur.execute('''CREATE TABLE IF NOT EXISTS payments (
         invoice_id INTEGER PRIMARY KEY,
         user_id INTEGER,
@@ -48,72 +57,12 @@ def init_db():
 
 init_db()
 
-# --- ПОЛЕЗНЫЕ ФУНКЦИИ ---
+# --- ФУНКЦИИ ОПЛАТЫ И ЛОГИРОВАНИЕ ОШИБОК ---
 
-def get_db_connection():
-    conn = sqlite3.connect('mrdotavpn.db', check_same_thread=False)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-def add_days_to_sub(user_id, days):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    cur.execute("SELECT subscription_end FROM users WHERE user_id = ?", (user_id,))
-    row = cur.fetchone()
-    
-    now = datetime.now()
-    if row and row['subscription_end']:
-        try:
-            current_end = datetime.strptime(row['subscription_end'], "%Y-%m-%d %H:%M:%S")
-            if current_end < now:
-                current_end = now
-        except:
-            current_end = now
-    else:
-        current_end = now
-        
-    new_end = current_end + timedelta(days=days)
-    new_end_str = new_end.strftime("%Y-%m-%d %H:%M:%S")
-    
-    cur.execute("UPDATE users SET subscription_end = ? WHERE user_id = ?", (new_end_str, user_id))
-    conn.commit()
-    conn.close()
-    return new_end_str
-
-def process_referral_reward(user_id, amount_paid):
-    """Начисляет 5% рефереру"""
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    # Ищем, кто пригласил этого пользователя
-    cur.execute("SELECT referrer_id FROM users WHERE user_id = ?", (user_id,))
-    row = cur.fetchone()
-    
-    if row and row['referrer_id']:
-        ref_id = row['referrer_id']
-        reward = amount_paid * 0.05 # 5 процентов
-        
-        # Начисляем награду
-        cur.execute("""
-            UPDATE users 
-            SET balance = balance + ?, referral_earnings = referral_earnings + ? 
-            WHERE user_id = ?
-        """, (reward, reward, ref_id))
-        
-        try:
-            bot.send_message(ref_id, f"🎉 Твой реферал купил подписку! Тебе начислено {reward:.2f} USDT")
-        except:
-            pass
-            
-    conn.commit()
-    conn.close()
-
-# --- CRYPTO BOT API ---
 def create_invoice(user_id, amount):
     url = 'https://pay.crypt.bot/api/createInvoice'
+    # Используем токен, который ты предоставил
     headers = {'Crypto-Pay-API-Token': CRYPTO_PAY_TOKEN}
-    # payload уникален для каждого чека
     payload = str(int(time.time())) + str(user_id) 
     data = {
         'asset': 'USDT',
@@ -123,9 +72,12 @@ def create_invoice(user_id, amount):
         'allow_comments': False
     }
     try:
-        response = requests.post(url, json=data, headers=headers).json()
-        if response['ok']:
-            invoice_id = response['result']['invoice_id']
+        response = requests.post(url, json=data, headers=headers)
+        response.raise_for_status() # Вызывает ошибку для HTTP 4xx/5xx
+        json_data = response.json()
+        
+        if json_data.get('ok'):
+            invoice_id = json_data['result']['invoice_id']
             # Сохраняем инвойс в базу
             conn = get_db_connection()
             conn.execute("INSERT INTO payments (invoice_id, user_id, amount, status) VALUES (?, ?, ?, ?)",
@@ -133,10 +85,52 @@ def create_invoice(user_id, amount):
             conn.commit()
             conn.close()
             
-            return response['result']['bot_invoice_url']
+            return json_data['result']['bot_invoice_url']
+        else:
+            # ЛОГИРОВАНИЕ КРИТИЧЕСКОЙ ОШИБКИ С API CRYPTOBOT
+            error_message = json_data.get('error', 'Unknown CryptoBot API error')
+            logging.error(f"CryptoBot API Error for user {user_id}: {error_message}")
+            logging.error(f"Full response: {json_data}")
+            return {'error': error_message}
+            
+    except requests.exceptions.HTTPError as e:
+        error_message = f"HTTP Error: {e.response.status_code}. Проверьте токен CryptoPay!"
+        logging.error(error_message)
+        return {'error': error_message}
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Network error connecting to CryptoBot API: {e}")
+        return {'error': 'Ошибка сети при подключении к CryptoBot.'}
     except Exception as e:
-        print(f"Invoice Error: {e}")
-    return None
+        logging.error(f"Unexpected error in create_invoice: {e}")
+        return {'error': 'Непредвиденная ошибка сервера.'}
+
+# --- КЭШИРОВАНИЕ КРИПТОВАЛЮТ ---
+
+def fetch_and_cache_crypto_rates():
+    global CRYPTO_CACHE, LAST_UPDATE
+    if time.time() - LAST_UPDATE < CACHE_LIFETIME:
+        return CRYPTO_CACHE
+    
+    url = 'https://api.coingecko.com/api/v3/simple/price'
+    params = {
+        'ids': 'bitcoin,ethereum,toncoin',
+        'vs_currencies': 'usd',
+        'include_24hr_change': 'true'
+    }
+    
+    try:
+        response = requests.get(url, params=params, timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        if data:
+            CRYPTO_CACHE = data
+            LAST_UPDATE = time.time()
+            logging.info("Crypto rates updated successfully from CoinGecko.")
+            return CRYPTO_CACHE
+        return None
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error fetching crypto rates: {e}. Returning cached data if available.")
+        return CRYPTO_CACHE if CRYPTO_CACHE else None
 
 # --- API ENDPOINTS (ДЛЯ WEB APP) ---
 
@@ -146,6 +140,7 @@ def home():
 
 @app.route('/api/user_info', methods=['POST'])
 def user_info():
+    # ... (логика осталась та же)
     data = request.json
     user_id = data.get('user_id')
     
@@ -154,7 +149,6 @@ def user_info():
     conn.close()
     
     if user:
-        # Считаем сколько дней с нами
         reg_date = datetime.strptime(user['reg_date'], "%Y-%m-%d %H:%M:%S")
         days_with_us = (datetime.now() - reg_date).days
         
@@ -176,57 +170,32 @@ def make_payment():
     user_id = data.get('user_id')
     price = data.get('price')
     
-    link = create_invoice(user_id, price)
-    if link:
-        return jsonify({'success': True, 'url': link})
-    return jsonify({'success': False, 'message': 'Ошибка создания счета'})
+    result = create_invoice(user_id, price) 
+    
+    if isinstance(result, str): # Успех, вернулась ссылка
+        return jsonify({'success': True, 'url': result})
+    else: # Ошибка, вернулся словарь с ошибкой
+        return jsonify({'success': False, 'message': result.get('error', 'Неизвестная ошибка')}), 400
 
-# --- WEBHOOK ДЛЯ CRYPTO BOT (АВТО-ОПЛАТА) ---
-# Чтобы это работало, нужно в @CryptoBot настроить Webhook на https://твои-домен/webhook/crypto
-@app.route('/webhook/crypto', methods=['POST'])
-def crypto_webhook():
-    data = request.json
-    if data.get('update_type') == 'invoice_paid':
-        invoice = data['payload'] # данные чека
-        invoice_id = invoice['invoice_id']
-        amount = float(invoice['amount'])
-        # payload, который мы передавали (timestamp+userid) можно распарсить, но у нас есть таблица payments
-        
-        conn = get_db_connection()
-        payment = conn.execute("SELECT * FROM payments WHERE invoice_id = ?", (invoice_id,)).fetchone()
-        
-        if payment and payment['status'] == 'pending':
-            user_id = payment['user_id']
-            
-            # 1. Обновляем статус платежа
-            conn.execute("UPDATE payments SET status = 'paid' WHERE invoice_id = ?", (invoice_id,))
-            
-            # 2. Выдаем подписку (например, 30 дней за 2 доллара)
-            days = 30 if amount < 4 else 90 # Пример логики
-            add_days_to_sub(user_id, days)
-            
-            # 3. Начисляем реферальные (5%)
-            process_referral_reward(user_id, amount)
-            
-            conn.commit()
-            bot.send_message(user_id, "✅ Оплата прошла успешно! Подписка активирована.")
-            
-        conn.close()
-    return 'ok', 200
+@app.route('/api/crypto_rates', methods=['GET'])
+def crypto_rates_endpoint():
+    rates = fetch_and_cache_crypto_rates()
+    if rates:
+        return jsonify({'success': True, 'rates': rates})
+    return jsonify({'success': False, 'message': 'Failed to load crypto rates and cache is empty.'}), 500
 
 # --- TELEGRAM BOT LOGIC ---
 
 @bot.message_handler(commands=['start'])
 def start_handler(message):
     user_id = message.from_user.id
-    username = message.from_user.username or "User"
+    username = message.from_user.username or message.from_user.first_name or "Пользователь"
     args = message.text.split()
     
     conn = get_db_connection()
     user = conn.execute("SELECT * FROM users WHERE user_id = ?", (user_id,)).fetchone()
     
     if not user:
-        # Регистрация
         referrer_id = None
         if len(args) > 1 and args[1].isdigit():
             ref_candidate = int(args[1])
@@ -245,7 +214,7 @@ def start_handler(message):
     markup.add(types.InlineKeyboardButton("🌐 Открыть MrdotaVPN", web_app=types.WebAppInfo(url=WEBAPP_URL)))
     
     bot.send_message(message.chat.id, 
-                     f"👋 Привет, {username}!\n\nДобро пожаловать в **MrdotaVPN**.\nЛучший VPN с Web3 оплатой и партнерской программой.",
+                     f"👋 Привет, {username}!\n\nДобро пожаловать в **MrdotaVPN**.\nЖми кнопку ниже.",
                      parse_mode='Markdown', reply_markup=markup)
 
 # --- ЗАПУСК ---
@@ -253,6 +222,7 @@ def run_flask():
     app.run(host='0.0.0.0', port=5000)
 
 if __name__ == '__main__':
+    logging.info("Starting MrdotaVPN Server...")
     t = threading.Thread(target=run_flask)
     t.start()
     bot.polling(none_stop=True)
