@@ -18,23 +18,25 @@ from flask import Flask, request, jsonify, render_template
 # --- КОНФИГУРАЦИЯ ---
 BOT_TOKEN = "8204021215:AAFO3BSZn6e4keyB1gS3AEEA-IylhUWIMro"
 WIREGUARD_SCRIPT_PATH = "/root/wireguard-install.sh"
-SERVER_PUBLIC_KEY = "qSearch Rv98fGCTjLuxW4ygE8Hl… on blockchair.comRv98fGCTjLuxW4ygE8HlizQQyAsKTmCWbPRybFRywc="
+SERVER_PUBLIC_KEY = "qSearch Rv98fGCTjLuxW4ygE8Hl… on blockchair.coSearch mRv98fGCTjLuxW4ygE8H… 
+on blockchair.commRv98fGCTjLuxW4ygE8HlizQQyAsKTmCWbPRybFRywc="
 SERVER_ENDPOINT = "136.0.8.219:51820"
 ADMIN_USER_ID = 5593856626
-CRYPTO_PAY_API_TOKEN = "502548:AAvGZlXQ13JYzhB3GEwTy4gbPc74iExUvmY"  # <--- ПРОВЕРЬТЕ ЭТОТ ТОКЕН!
-WEBAPP_URL = "https://yarikzov.github.io/vpn-bot-ui/" # <--- ОБНОВИТЕ!
+CRYPTO_PAY_API_TOKEN = "469810:AAD9NszRx10wOih6coLQc1leKhdwcR6n4SR"  # <--- ПРОВЕРЬТЕ ЭТОТ ТОКЕН!
+WEBAPP_URL = "https://ТВОЙ_URL_ОТ_NGROK_ИЛИ_ДОМЕН" # <--- ОБНОВИТЕ!
 FLASK_PORT = 5000
 
 # --- СИСТЕМНЫЕ НАСТРОЙКИ ---
 app = Flask(__name__, template_folder='templates') # Инициализация Flask
 bot = telebot.TeleBot(BOT_TOKEN)
 
-# Настройка логирования
+# Настройка логирования (ИСПРАВЛЕНО: Путь к логу изменен)
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('/var/log/vpn-bot.log'),
+        # Изменено на относительный путь для решения PermissionError
+        logging.FileHandler('vpn-bot.log'), 
         logging.StreamHandler()
     ]
 )
@@ -69,7 +71,6 @@ class CryptoPay:
             if not result.get("ok"):
                 error_msg = result.get('error', {}).get('name', 'Unknown error')
                 logging.error(f"CryptoPay API Error: {error_msg}")
-                # Возвращаем полный ответ, чтобы Web App мог показать ошибку
                 return {'ok': False, 'error': error_msg, 'details': result}
                 
             return result
@@ -99,7 +100,6 @@ class CryptoPay:
                 'ok': True
             })
         else:
-            # Возвращаем ошибку из API
             return type('Invoice', (), {
                 'ok': False,
                 'error': result.get('error', 'Unknown error'),
@@ -144,7 +144,6 @@ def init_db():
     conn = get_db_connection()
     c = conn.cursor()
     
-    # 1. Основная таблица пользователей (расширенная)
     c.execute('''CREATE TABLE IF NOT EXISTS users
                  (user_id INTEGER PRIMARY KEY, 
                   username TEXT,
@@ -156,7 +155,6 @@ def init_db():
                   balance REAL DEFAULT 0
                   )''')
     
-    # 2. Таблица подписок
     c.execute('''CREATE TABLE IF NOT EXISTS subscriptions
                  (user_id INTEGER PRIMARY KEY,
                   subscription_start TIMESTAMP,
@@ -164,7 +162,6 @@ def init_db():
                   status TEXT DEFAULT 'trial',
                   tariff_id INTEGER)''')
     
-    # 3. Таблица платежей
     c.execute('''CREATE TABLE IF NOT EXISTS payments
                  (payment_id INTEGER PRIMARY KEY AUTOINCREMENT,
                   user_id INTEGER,
@@ -175,7 +172,6 @@ def init_db():
                   invoice_id TEXT,
                   tariff_id INTEGER)''')
     
-    # 4. Таблица тарифов
     c.execute('''CREATE TABLE IF NOT EXISTS tariffs
                  (tariff_id INTEGER PRIMARY KEY AUTOINCREMENT,
                   name TEXT,
@@ -187,7 +183,7 @@ def init_db():
     if c.fetchone()[0] == 0:
         tariffs = [
             ('1 день (пробный)', 1, 0.0, 'FREE'),
-            ('1 месяц', 30, 2.0, 'USDT'),  # Обновлены цены согласно вашему HTML
+            ('1 месяц', 30, 2.0, 'USDT'),
             ('3 месяца', 90, 5.0, 'USDT')
         ]
         c.executemany("INSERT INTO tariffs (name, days, price, currency) VALUES (?, ?, ?, ?)", tariffs)
@@ -207,7 +203,7 @@ def process_referral_reward(user_id, amount_paid):
     
     if row and row['referrer_id']:
         ref_id = row['referrer_id']
-        reward = amount_paid * 0.05 # 5 процентов
+        reward = amount_paid * 0.05
         
         cur.execute("""
             UPDATE users 
@@ -224,13 +220,10 @@ def process_referral_reward(user_id, amount_paid):
     conn.close()
 
 def create_trial_subscription(user_id):
-    """Создание пробной подписки на 1 день"""
     conn = get_db_connection()
     c = conn.cursor()
-    
     subscription_start = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     subscription_end = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
-    
     c.execute('''INSERT OR REPLACE INTO subscriptions 
                  (user_id, subscription_start, subscription_end, status, tariff_id) 
                  VALUES (?, ?, ?, ?, ?)''',
@@ -239,13 +232,11 @@ def create_trial_subscription(user_id):
     conn.close()
 
 def update_subscription(user_id, tariff_id):
-    """Обновление подписки пользователя"""
     conn = get_db_connection()
     c = conn.cursor()
     
     c.execute("SELECT days FROM tariffs WHERE tariff_id = ?", (tariff_id,))
     tariff = c.fetchone()
-    
     if not tariff:
         conn.close()
         return False
@@ -262,7 +253,6 @@ def update_subscription(user_id, tariff_id):
         except ValueError:
             current_end = now
         
-        # Продлеваем с момента окончания, если она активна, иначе с текущего момента
         start_time = max(now, current_end)
         new_end = start_time + timedelta(days=days)
     else:
@@ -280,7 +270,6 @@ def update_subscription(user_id, tariff_id):
     return True
 
 def create_payment_invoice(user_id, tariff_id):
-    """Создание инвойса для оплаты через Crypto Pay"""
     try:
         conn = get_db_connection()
         c = conn.cursor()
@@ -337,17 +326,17 @@ def generate_client_name(user_id):
     return f"client_{user_id}"
 
 def remove_wireguard_user(client_name):
-    # ЗДЕСЬ ДОЛЖЕН БЫТЬ ВАШ КОД ИЗ ФАЙЛА
     logging.info(f"Removing WireGuard user: {client_name}")
+    # Вставьте ваш реальный код для удаления пира WireGuard здесь
     return True, f"Пользователь {client_name} удален (заглушка)"
 
 def add_wireguard_user(client_name):
-    # ЗДЕСЬ ДОЛЖЕН БЫТЬ ВАШ КОД ИЗ ФАЙЛА
     logging.info(f"Adding WireGuard user: {client_name}")
+    # Вставьте ваш реальный код для добавления пира WireGuard здесь
     return True, f"/root/{client_name}.conf"
 
 def get_wireguard_config_content(client_name):
-    # ЗДЕСЬ ДОЛЖЕН БЫТЬ ВАШ КОД ИЗ ФАЙЛА
+    # Вставьте ваш реальный код для генерации конфига WireGuard здесь
     config_content = (
         "[Interface]\n"
         f"PrivateKey = <PRIVATE_KEY_OF_{client_name}>\n"
@@ -380,11 +369,11 @@ def subscription_monitor():
             expired_users = c.fetchall()
             
             for user in expired_users:
-                user_id = user['user_id']
-                client_name = user['client_name']
-                amount_paid = user['price'] # Используем цену тарифа для рефералки
-                
+                # user_id = user['user_id']
+                # client_name = user['client_name']
+                # amount_paid = user['price']
                 # ... (Логика удаления WireGuard и уведомления) ...
+                pass 
 
             conn.commit()
             
@@ -393,12 +382,11 @@ def subscription_monitor():
             pending_payments = c.fetchall()
             
             for payment in pending_payments:
-                status = crypto_client.get_invoices(invoice_ids=payment['invoice_id'])
-                if status and status[0].status == 'paid':
+                invoices = crypto_client.get_invoices(invoice_ids=payment['invoice_id'])
+                if invoices and invoices[0].status == 'paid':
                     if update_subscription(payment['user_id'], payment['tariff_id']):
                         c.execute("UPDATE payments SET payment_status = 'completed' WHERE payment_id = ?", (payment['payment_id'],))
                         
-                        # Начисляем реферальное вознаграждение!
                         process_referral_reward(payment['user_id'], payment['amount']) 
                         
                         bot.send_message(payment['user_id'], "✅ Оплата подтверждена! Ваша подписка активирована.")
@@ -410,7 +398,7 @@ def subscription_monitor():
         except Exception as e:
             logging.error(f"Ошибка в мониторе подписок: {e}")
         
-        time.sleep(60) # Проверяем каждую минуту
+        time.sleep(60)
 
 # Запуск монитора в отдельном потоке
 monitor_thread = threading.Thread(target=subscription_monitor, daemon=True)
@@ -467,7 +455,6 @@ def user_info():
         days_with_us = (datetime.now() - reg_date).days
 
         bot_info = bot.get_me()
-        # Формат для реферальной ссылки: start=ref_USER_ID
         ref_link = f"https://t.me/{bot_info.username}?start=ref_{user_id}" 
 
         return jsonify({
@@ -485,7 +472,6 @@ def user_info():
 @app.route('/api/tariffs', methods=['GET'])
 def get_tariffs():
     conn = get_db_connection()
-    # Выводим только платные тарифы
     tariffs = conn.execute("SELECT tariff_id, name, days, price, currency FROM tariffs WHERE price > 0 ORDER BY days").fetchall()
     conn.close()
     
@@ -504,7 +490,6 @@ def make_payment():
     if invoice and invoice.ok and invoice.pay_url: 
         return jsonify({'success': True, 'url': invoice.pay_url, 'invoice_id': invoice.invoice_id})
     else:
-        # Отправляем сообщение об ошибке, полученное от CryptoPay
         error_message = invoice.error if invoice else 'Unknown error'
         logging.error(f"Failed to create payment for user {user_id}: {error_message}")
         return jsonify({'success': False, 'message': f'Ошибка CryptoPay: {error_message}'}), 400
@@ -529,10 +514,8 @@ def start_handler(message):
     
     if not user:
         referrer_id = None
-        # Проверка реферального кода: start=ref_USER_ID
         if len(args) > 1 and args[1].startswith('ref_') and args[1][4:].isdigit():
             ref_candidate = int(args[1][4:])
-            # Проверяем, что реферер существует и не является самим собой
             if ref_candidate != user_id and conn.execute("SELECT user_id FROM users WHERE user_id = ?", (ref_candidate,)).fetchone():
                 referrer_id = ref_candidate
                 conn.execute("UPDATE users SET referrals_count = referrals_count + 1 WHERE user_id = ?", (referrer_id,))
@@ -542,7 +525,6 @@ def start_handler(message):
                      (user_id, username, referrer_id, reg_date))
         conn.commit()
         
-        # Выдача пробной подписки
         create_trial_subscription(user_id)
         
     conn.close()
@@ -557,10 +539,8 @@ def start_handler(message):
 
 @bot.message_handler(func=lambda message: message.text == 'get_vpn_config')
 def handle_get_config_from_webapp(message):
-    """Обработчик, вызываемый из Web App через sendData"""
     user_id = message.from_user.id
     
-    # 1. Проверяем подписку
     conn = get_db_connection()
     sub = conn.execute("SELECT subscription_end FROM subscriptions WHERE user_id = ?", (user_id,)).fetchone()
     conn.close()
@@ -575,16 +555,13 @@ def handle_get_config_from_webapp(message):
         bot.send_message(user_id, "❌ Ваша подписка не активна. Пожалуйста, оплатите подписку в Web App.")
         return
     
-    # 2. Получаем имя клиента
     client_name = generate_client_name(user_id)
 
-    # 3. Создаем/обновляем WireGuard пир
     success, result_path = add_wireguard_user(client_name)
     
     if success:
         config_content = get_wireguard_config_content(client_name)
 
-        # 4. Отправляем конфиг в виде файла и QR-кода
         try:
             # QR-код
             qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
@@ -592,13 +569,12 @@ def handle_get_config_from_webapp(message):
             qr.make(fit=True)
             img = qr.make_image(fill_color="black", back_color="white")
             
-            # Отправка QR-кода
             img_byte_arr = BytesIO()
             img.save(img_byte_arr, format='PNG')
             img_byte_arr.seek(0)
             bot.send_photo(user_id, img_byte_arr, caption="🔑 Ваш WireGuard QR-код для настройки. Используйте его в приложении WireGuard.")
             
-            # Отправка файла
+            # Файл
             file_bytes = BytesIO(config_content.encode('utf-8'))
             file_bytes.name = f'{client_name}.conf'
             bot.send_document(user_id, file_bytes, caption="📄 Ваш WireGuard конфиг-файл.")
@@ -618,10 +594,8 @@ def run_flask():
 if __name__ == '__main__':
     logging.info("Starting MrdotaVPN Server and Bot...")
     
-    # 1. Запускаем Flask в отдельном потоке
     flask_thread = threading.Thread(target=run_flask)
     flask_thread.daemon = True 
     flask_thread.start()
     
-    # 2. Запускаем Bot
     bot.polling(none_stop=True)
