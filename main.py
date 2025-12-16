@@ -22,8 +22,8 @@ SERVER_PUBLIC_KEY = "qSearch Rv98fGCTjLuxW4ygE8Hl… on blockchair.coSearch mRv9
 on blockchair.commRv98fGCTjLuxW4ygE8HlizQQyAsKTmCWbPRybFRywc="
 SERVER_ENDPOINT = "136.0.8.219:51820"
 ADMIN_USER_ID = 5593856626
-CRYPTO_PAY_API_TOKEN = "469810:AAD9NszRx10wOih6coLQc1leKhdwcR6n4SR"  # <--- ПРОВЕРЬТЕ ЭТОТ ТОКЕН!
-WEBAPP_URL = "https://ТВОЙ_URL_ОТ_NGROK_ИЛИ_ДОМЕН" # <--- ОБНОВИТЕ!
+CRYPTO_PAY_API_TOKEN = "502548:AAvGZlXQ13JYzhB3GEwTy4gbPc74iExUvmY"  # <--- ПРОВЕРЬТЕ ЭТОТ ТОКЕН!
+WEBAPP_URL = "https://yarikzov.github.io/vpn-bot-ui/" # <--- ОБНОВИТЕ!
 FLASK_PORT = 5000
 
 # --- СИСТЕМНЫЕ НАСТРОЙКИ ---
