@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import json
 
 # --- КОНФИГУРАЦИЯ ---
-BOT_TOKEN = "8204021215:AAFO3BSZn6e4keyB1gS3AEEA-IylhUWIMro" 
+BOT_TOKEN = "" 
 CRYPTO_PAY_TOKEN = "469810:AAD9NszRx10wOih6coLQc1leKhdwcR6n4SR" # <--- ПРОВЕРЬТЕ ЭТОТ ТОКЕН!
 # ВАЖНО: Сюда вставь свой HTTPS URL от ngrok или домена
 WEBAPP_URL = "https://ТВОЙ_URL_ОТ_NGROK_ИЛИ_ДОМЕН" 
