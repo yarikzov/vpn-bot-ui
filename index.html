@@ -3,860 +3,1387 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>VPN — Панель управления</title>
+<title>VPN Panel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"/>
 <style>
-  /* ── Reset & base ──────────────────────────────────────── */
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg:        #0f0f11;
-    --bg2:       #16161a;
-    --bg3:       #1e1e24;
-    --border:    rgba(255,255,255,0.07);
-    --accent:    #4ade80;
-    --accent2:   #22c55e;
-    --accentB:   #3b82f6;
-    --danger:    #ef4444;
-    --gold:      #f59e0b;
-    --text:      #f0f0f3;
-    --muted:     #6b7280;
-    --card-r:    16px;
-    --tab-h:     72px;
-    --safe-bot:  env(safe-area-inset-bottom, 0px);
-  }
-  html { height: 100%; background: var(--bg); color: var(--text); font-family: 'Sora', sans-serif; }
-  body { min-height: 100%; max-width: 480px; margin: 0 auto; overflow-x: hidden; }
+/* ═══════════════════════════════ CSS VARIABLES */
+:root {
+  --bg:          #080810;
+  --bg1:         #0d0d1a;
+  --bg2:         #111120;
+  --bg3:         #16162a;
+  --bg4:         #1c1c35;
+  --border:      rgba(120,120,255,0.12);
+  --border2:     rgba(120,120,255,0.22);
 
-  /* ── Scrollbar ──────────────────────────────────────────── */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  /* Neon palette */
+  --cyan:        #00f5ff;
+  --cyan-dim:    rgba(0,245,255,0.15);
+  --cyan-glow:   rgba(0,245,255,0.35);
+  --violet:      #8b5cf6;
+  --violet-dim:  rgba(139,92,246,0.15);
+  --violet-glow: rgba(139,92,246,0.4);
+  --pink:        #f472b6;
+  --pink-dim:    rgba(244,114,182,0.12);
+  --green:       #4ade80;
+  --green-dim:   rgba(74,222,128,0.12);
+  --green-glow:  rgba(74,222,128,0.3);
+  --amber:       #fbbf24;
+  --amber-dim:   rgba(251,191,36,0.12);
+  --red:         #f87171;
+  --red-dim:     rgba(248,113,113,0.12);
 
-  /* ── Pages ──────────────────────────────────────────────── */
-  .page { display: none; flex-direction: column; min-height: calc(100vh - var(--tab-h)); padding: 0 0 calc(var(--tab-h) + var(--safe-bot) + 8px); }
-  .page.active { display: flex; }
+  --text:        #e8e8ff;
+  --text2:       #a0a0c8;
+  --text3:       #5a5a88;
 
-  /* ── Top header ──────────────────────────────────────────── */
-  .top-bar {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 20px 0;
-  }
-  .avatar-wrap { display: flex; align-items: center; gap: 12px; }
-  .avatar {
-    width: 52px; height: 52px; border-radius: 50%;
-    background: linear-gradient(135deg, #f59e0b, #ef4444);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px; font-weight: 700; color: #fff;
-  }
-  .user-info { display: flex; flex-direction: column; }
-  .user-name  { font-size: 15px; font-weight: 600; }
-  .user-sub   { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .help-btn {
-    width: 44px; height: 44px; border-radius: 12px;
-    background: var(--bg3); border: 1px solid var(--border);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 1px; cursor: pointer; text-decoration: none;
-    font-size: 9px; color: var(--muted);
-  }
-  .help-btn svg { width: 18px; height: 18px; }
+  --radius-sm:   10px;
+  --radius:      16px;
+  --radius-lg:   22px;
+  --radius-xl:   28px;
 
-  /* ── Card ────────────────────────────────────────────────── */
-  .card {
-    background: var(--bg2); border: 1px solid var(--border);
-    border-radius: var(--card-r); padding: 18px; margin: 12px 16px 0;
-  }
-  .card-title { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  --tab-h:       80px;
+  --safe-bot:    env(safe-area-inset-bottom, 0px);
+  --font:        'Plus Jakarta Sans', sans-serif;
+}
 
-  /* ── Status banner ───────────────────────────────────────── */
-  .status-banner {
-    margin: 14px 16px 0; border-radius: var(--card-r);
-    padding: 14px 16px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .status-banner.protected   { background: linear-gradient(120deg, #14532d22, #052e1622); border: 1px solid #22c55e44; }
-  .status-banner.unprotected { background: linear-gradient(120deg, #7f1d1d22, #45051522); border: 1px solid #ef444444; }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; flex-shrink: 0; }
-  .status-dot.green { background: var(--accent); box-shadow: 0 0 6px #4ade8066; }
-  .status-dot.red   { background: var(--danger);  box-shadow: 0 0 6px #ef444466; }
-  .status-left  { display: flex; align-items: center; }
-  .status-text  { font-size: 14px; font-weight: 600; }
-  .status-sub   { font-size: 12px; color: var(--muted); }
-  .badge-discount {
-    background: var(--danger); color: #fff; font-size: 11px; font-weight: 700;
-    padding: 4px 8px; border-radius: 8px; white-space: nowrap;
-  }
+/* ═══════════════════════════════ RESET */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { height: 100%; overflow-x: hidden; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  min-height: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  overflow-x: hidden;
+}
 
-  /* ── Feature row ─────────────────────────────────────────── */
-  .features { display: flex; gap: 8px; margin: 0 16px; flex-wrap: wrap; }
-  .feat-chip {
-    display: flex; align-items: center; gap: 5px;
-    font-size: 11px; color: var(--muted);
-    background: var(--bg3); border: 1px solid var(--border);
-    border-radius: 20px; padding: 5px 10px;
-  }
-  .feat-chip svg { width: 12px; height: 12px; }
+/* ═══════════════════════════════ NOISE TEXTURE */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity: 0.4;
+}
 
-  /* ── Buttons ─────────────────────────────────────────────── */
-  .btn {
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    border: none; border-radius: 12px; cursor: pointer;
-    font-family: inherit; font-weight: 600; font-size: 15px;
-    transition: filter .15s, transform .1s;
-  }
-  .btn:active { transform: scale(.97); filter: brightness(.9); }
-  .btn-primary { background: #fff; color: #000; padding: 16px 20px; width: 100%; }
-  .btn-green   { background: var(--accent2); color: #fff; padding: 16px 20px; width: 100%; }
-  .btn-blue    { background: var(--accentB); color: #fff; padding: 14px 20px; width: 100%; }
-  .btn-outline {
-    background: transparent; color: var(--text); padding: 12px 16px;
-    border: 1px solid var(--border); border-radius: 10px; flex: 1;
-  }
+/* ═══════════════════════════════ SCROLLBAR */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
 
-  /* ── Divider ─────────────────────────────────────────────── */
-  .divider { height: 1px; background: var(--border); margin: 8px 0; }
+/* ═══════════════════════════════ PAGES */
+.page { display: none; flex-direction: column; padding-bottom: calc(var(--tab-h) + var(--safe-bot) + 16px); position: relative; z-index: 1; }
+.page.active { display: flex; animation: fadeUp .25s ease; }
+@keyframes fadeUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: none; } }
 
-  /* ── Tab bar ─────────────────────────────────────────────── */
-  .tab-bar {
-    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-    width: 100%; max-width: 480px;
-    background: var(--bg2); border-top: 1px solid var(--border);
-    display: flex; padding: 0 4px calc(var(--safe-bot) + 8px) 4px;
-    height: var(--tab-h); align-items: flex-start; padding-top: 8px;
-    z-index: 100;
-  }
-  .tab-item {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; gap: 4px; cursor: pointer;
-    padding: 6px 4px; border-radius: 10px;
-    transition: background .15s;
-  }
-  .tab-item:hover { background: var(--bg3); }
-  .tab-item.active .tab-icon { color: var(--accent); }
-  .tab-item.active .tab-label { color: var(--accent); }
-  .tab-icon { width: 24px; height: 24px; color: var(--muted); transition: color .15s; }
-  .tab-label { font-size: 10px; font-weight: 500; color: var(--muted); transition: color .15s; }
+/* ═══════════════════════════════ AMBIENT GLOWS (background fx) */
+.glow-orb {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(80px);
+}
+.glow-orb-1 { width: 300px; height: 300px; background: rgba(139,92,246,0.08); top: -80px; right: -60px; }
+.glow-orb-2 { width: 250px; height: 250px; background: rgba(0,245,255,0.05); top: 300px; left: -80px; }
+.glow-orb-3 { width: 200px; height: 200px; background: rgba(244,114,182,0.04); bottom: 200px; right: -40px; }
 
-  /* ── Audit badge ─────────────────────────────────────────── */
-  .audit-card {
-    margin: 14px 16px 0; border-radius: var(--card-r);
-    background: linear-gradient(120deg, #1e1e2a, #16161f);
-    border: 1px solid var(--border); padding: 14px 16px;
-    display: flex; align-items: center; gap: 12px;
-  }
-  .audit-icon { font-size: 22px; }
-  .audit-text { flex: 1; }
-  .audit-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
-  .audit-sub   { font-size: 11px; color: var(--muted); }
-  .audit-by    { font-size: 11px; color: var(--muted); white-space: nowrap; }
-  .audit-btn   {
-    background: var(--bg3); border: 1px solid var(--border);
-    color: var(--text); border-radius: 8px; padding: 6px 12px;
-    font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit;
-  }
+/* ═══════════════════════════════ CARD */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  margin: 10px 14px 0;
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.025) 0%, transparent 60%);
+  pointer-events: none;
+}
+.card-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--text3); margin-bottom: 12px;
+}
 
-  /* ── VPN page ────────────────────────────────────────────── */
-  .toggle-row {
-    display: flex; background: var(--bg3); border-radius: 10px;
-    padding: 4px; margin: 16px 16px 0; gap: 4px;
-  }
-  .toggle-btn {
-    flex: 1; padding: 10px; border-radius: 8px; border: none;
-    background: transparent; color: var(--muted); font-family: inherit;
-    font-size: 14px; font-weight: 500; cursor: pointer; transition: all .2s;
-  }
-  .toggle-btn.active {
-    background: var(--bg2); color: var(--text);
-    box-shadow: 0 1px 4px rgba(0,0,0,.4);
-  }
-  .plan-chips {
-    display: flex; gap: 8px; overflow-x: auto; padding: 0 16px;
-    scrollbar-width: none; margin-top: 12px;
-  }
-  .plan-chips::-webkit-scrollbar { display: none; }
-  .plan-chip {
-    flex-shrink: 0; border-radius: 20px; padding: 7px 14px;
-    background: var(--bg3); border: 1px solid var(--border);
-    color: var(--muted); font-size: 13px; font-weight: 500; cursor: pointer;
-    transition: all .15s;
-  }
-  .plan-chip.active {
-    background: var(--accentB); border-color: var(--accentB); color: #fff;
-  }
-  .tariff-card {
-    margin: 12px 16px 0; border-radius: var(--card-r);
-    border: 2px solid var(--accentB); background: var(--bg2);
-    overflow: hidden;
-  }
-  .tariff-header {
-    padding: 16px; display: flex; justify-content: space-between; align-items: flex-start;
-    border-bottom: 1px solid var(--border);
-  }
-  .tariff-name { font-size: 16px; font-weight: 700; }
-  .tariff-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .tariff-price { text-align: right; }
-  .tariff-amount { font-size: 22px; font-weight: 700; color: var(--text); }
-  .tariff-period { font-size: 11px; color: var(--muted); }
-  .tariff-old    { font-size: 11px; color: var(--muted); text-decoration: line-through; }
-  .tariff-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 12px 16px; border-bottom: 1px solid var(--border);
-  }
-  .tariff-row:last-child { border-bottom: none; }
-  .tariff-row-left { display: flex; align-items: center; gap: 10px; }
-  .tariff-row-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--bg3); display: flex; align-items: center; justify-content: center; font-size: 14px; }
-  .tariff-row-label { font-size: 13px; font-weight: 500; }
-  .tariff-row-sub   { font-size: 11px; color: var(--muted); }
-  .tariff-row-val   { font-size: 13px; font-weight: 600; color: var(--accentB); }
-  .save-badge {
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    color: #fff; font-size: 11px; font-weight: 700;
-    padding: 4px 8px; border-radius: 6px; margin-bottom: 8px; text-align: center;
-  }
-  .pay-sticky {
-    position: sticky; bottom: calc(var(--tab-h) + var(--safe-bot) + 8px);
-    background: linear-gradient(to top, var(--bg) 70%, transparent);
-    padding: 12px 16px 0;
-  }
-  .pay-fine { font-size: 11px; color: var(--muted); text-align: center; margin-top: 8px; }
+/* ═══════════════════════════════ SECTION DIVIDER */
+.section-divider {
+  height: 1px; background: var(--border); margin: 0;
+}
 
-  /* ── Config section ──────────────────────────────────────── */
-  .config-box {
-    background: var(--bg3); border-radius: 10px; padding: 14px;
-    font-family: 'JetBrains Mono', monospace; font-size: 11px;
-    color: var(--muted); word-break: break-all; line-height: 1.6;
-    border: 1px solid var(--border);
-  }
-  .copy-row { display: flex; gap: 8px; margin-top: 10px; }
-  .copy-row .btn-outline { font-size: 13px; }
+/* ═══════════════════════════════ TOP HEADER */
+.top-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 16px 0; position: relative; z-index: 2;
+}
+.user-pill {
+  display: flex; align-items: center; gap: 11px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 50px; padding: 6px 14px 6px 6px;
+}
+.avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--violet), var(--cyan));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: #fff;
+  box-shadow: 0 0 14px var(--violet-glow);
+  flex-shrink: 0;
+}
+.user-name-sm { font-size: 14px; font-weight: 600; }
+.help-btn {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: var(--bg2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--text3); transition: color .2s, border-color .2s;
+  flex-shrink: 0;
+}
+.help-btn:hover { color: var(--text); border-color: var(--border2); }
 
-  /* ── QR placeholder ──────────────────────────────────────── */
-  .qr-wrap {
-    width: 160px; height: 160px; background: #fff;
-    border-radius: 12px; margin: 0 auto;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px; color: #000; text-align: center;
-  }
-  .qr-wrap img { width: 100%; height: 100%; border-radius: 12px; object-fit: contain; }
+/* ═══════════════════════════════ STATUS HERO */
+.status-hero {
+  margin: 14px 14px 0;
+  border-radius: var(--radius-xl);
+  padding: 22px 20px;
+  position: relative; overflow: hidden;
+  border: 1px solid var(--border);
+  min-height: 120px;
+}
+.status-hero.protected {
+  background: linear-gradient(145deg, #0a1f12, #071a17);
+  border-color: rgba(74,222,128,0.2);
+}
+.status-hero.unprotected {
+  background: linear-gradient(145deg, #1a0a0a, #170a0a);
+  border-color: rgba(248,113,113,0.2);
+}
+.status-hero-glow {
+  position: absolute; width: 180px; height: 180px; border-radius: 50%;
+  right: -40px; top: -40px; filter: blur(60px); pointer-events: none;
+}
+.protected .status-hero-glow  { background: rgba(74,222,128,0.12); }
+.unprotected .status-hero-glow { background: rgba(248,113,113,0.10); }
+.status-indicator {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+.status-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+.status-dot.green { background: var(--green); box-shadow: 0 0 8px var(--green-glow); animation: pulse-green 2s infinite; }
+.status-dot.red   { background: var(--red);   box-shadow: 0 0 8px rgba(248,113,113,0.5); }
+@keyframes pulse-green { 0%,100% { box-shadow: 0 0 8px var(--green-glow); } 50% { box-shadow: 0 0 16px var(--green-glow); } }
+.status-label { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.protected   .status-label { color: var(--green); }
+.unprotected .status-label { color: var(--red); }
+.status-title { font-size: 22px; font-weight: 800; margin-bottom: 4px; letter-spacing: -.02em; }
+.status-sub   { font-size: 12px; color: var(--text2); line-height: 1.5; }
+.discount-chip {
+  position: absolute; top: 16px; right: 16px;
+  background: var(--red); color: #fff;
+  font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 8px;
+  letter-spacing: .02em;
+}
 
-  /* ── Stats row ───────────────────────────────────────────── */
-  .stat-row {
-    display: flex; gap: 8px; margin: 12px 16px 0;
-  }
-  .stat-box {
-    flex: 1; background: var(--bg2); border: 1px solid var(--border);
-    border-radius: 12px; padding: 12px; text-align: center;
-  }
-  .stat-val  { font-size: 18px; font-weight: 700; }
-  .stat-label { font-size: 10px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: .06em; }
+/* ═══════════════════════════════ FEATURE CHIPS */
+.chips-row {
+  display: flex; gap: 8px; overflow-x: auto; padding: 12px 14px 0;
+  scrollbar-width: none;
+}
+.chips-row::-webkit-scrollbar { display: none; }
+.chip {
+  display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 7px 12px;
+  font-size: 12px; font-weight: 500; color: var(--text2);
+  white-space: nowrap;
+}
+.chip svg { width: 13px; height: 13px; flex-shrink: 0; }
+.chip.cyan   { border-color: rgba(0,245,255,0.2);   color: var(--cyan);   background: var(--cyan-dim); }
+.chip.violet { border-color: rgba(139,92,246,0.25);  color: #b48aff;       background: var(--violet-dim); }
+.chip.green  { border-color: rgba(74,222,128,0.2);   color: var(--green);  background: var(--green-dim); }
 
-  /* ── Referrals ───────────────────────────────────────────── */
-  .ref-link-box {
-    background: var(--bg3); border: 1px solid var(--border);
-    border-radius: 10px; padding: 12px 14px;
-    font-family: 'JetBrains Mono', monospace; font-size: 11px;
-    color: var(--muted); word-break: break-all; margin-bottom: 10px;
-  }
-  .progress-row {
-    display: flex; gap: 8px; justify-content: center; margin-top: 12px;
-  }
-  .progress-dot {
-    width: 44px; height: 44px; border-radius: 50%;
-    background: var(--bg3); border: 2px solid var(--border);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; color: var(--muted);
-    transition: border-color .3s, background .3s;
-  }
-  .progress-dot.done { border-color: var(--accent); background: #14532d44; color: var(--accent); }
-  .progress-num { font-size: 10px; color: var(--muted); text-align: center; margin-top: 4px; }
+/* ═══════════════════════════════ BUTTONS */
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  border: none; border-radius: var(--radius); cursor: pointer;
+  font-family: var(--font); font-weight: 700; font-size: 15px;
+  transition: filter .15s, transform .1s, box-shadow .2s;
+  position: relative; overflow: hidden;
+}
+.btn::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%);
+  pointer-events: none;
+}
+.btn:active { transform: scale(.96); filter: brightness(.88); }
 
-  /* ── Profile ─────────────────────────────────────────────── */
-  .profile-hero {
-    background: linear-gradient(135deg, #1a1a2e, #16213e);
-    border-radius: var(--card-r); margin: 12px 16px 0;
-    padding: 20px; position: relative; overflow: hidden;
-    border: 1px solid var(--border);
-  }
-  .profile-hero::before {
-    content: ''; position: absolute; inset: 0;
-    background: radial-gradient(circle at 80% 20%, #3b82f622 0%, transparent 60%);
-  }
-  .profile-username { font-size: 18px; font-weight: 700; }
-  .profile-handle   { font-size: 13px; color: var(--muted); margin-top: 2px; }
-  .profile-meta     { display: flex; justify-content: space-between; margin-top: 12px; }
-  .profile-meta-item label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
-  .profile-meta-item p     { font-size: 12px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
-  .sub-inactive { background: var(--danger); color: #fff; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 6px; position: absolute; top: 16px; right: 16px; }
-  .sub-active   { background: var(--accent2); color: #fff; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 6px; position: absolute; top: 16px; right: 16px; }
-  .data-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 14px 0; border-bottom: 1px solid var(--border);
-  }
-  .data-row:last-child { border-bottom: none; }
-  .data-row label { font-size: 11px; color: var(--muted); margin-bottom: 2px; display: block; }
-  .data-row-val { font-size: 13px; font-weight: 500; font-family: 'JetBrains Mono', monospace; }
-  .data-row-val.red { color: var(--danger); }
-  .copy-small {
-    background: var(--bg3); border: 1px solid var(--border); color: var(--muted);
-    border-radius: 8px; padding: 6px 10px; font-size: 12px; cursor: pointer;
-    font-family: inherit; transition: color .15s;
-  }
-  .copy-small:hover { color: var(--text); }
-  .input-field {
-    width: 100%; background: var(--bg3); border: 1px solid var(--border);
-    color: var(--text); border-radius: 10px; padding: 12px 14px;
-    font-size: 13px; font-family: inherit; outline: none; margin-top: 4px;
-    transition: border-color .2s;
-  }
-  .input-field:focus { border-color: var(--accentB); }
-  .link-icon {
-    background: var(--bg3); border: 1px solid var(--border);
-    border-radius: 10px; padding: 10px; cursor: pointer; color: var(--muted);
-    transition: color .15s;
-  }
-  .link-icon:hover { color: var(--text); }
-  .section-header {
-    display: flex; align-items: center; gap: 10px;
-    background: var(--bg3); border-radius: 12px; padding: 12px 14px;
-    margin-bottom: 2px;
-  }
-  .section-icon {
-    width: 34px; height: 34px; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center; font-size: 16px;
-  }
-  .section-icon.orange { background: #f59e0b22; }
-  .section-icon.blue   { background: #3b82f622; }
-  .section-icon.green  { background: #22c55e22; }
-  .section-title  { font-size: 14px; font-weight: 600; }
-  .section-sub    { font-size: 11px; color: var(--muted); }
+.btn-primary {
+  background: linear-gradient(135deg, #7c3aed, var(--violet));
+  color: #fff; padding: 16px 20px; width: 100%;
+  box-shadow: 0 4px 24px rgba(139,92,246,0.35);
+}
+.btn-cyan {
+  background: linear-gradient(135deg, #0891b2, #0e7490);
+  color: #fff; padding: 16px 20px; width: 100%;
+  box-shadow: 0 4px 24px rgba(0,245,255,0.2);
+}
+.btn-green {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: #fff; padding: 16px 20px; width: 100%;
+  box-shadow: 0 4px 20px rgba(74,222,128,0.25);
+}
+.btn-outline {
+  background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text); padding: 13px 16px; border-radius: var(--radius-sm);
+}
+.btn-outline:hover { border-color: var(--border2); }
+.btn-ghost {
+  background: transparent; border: 1px solid var(--border2);
+  color: var(--text2); padding: 10px 16px; border-radius: 10px;
+  font-size: 13px;
+}
 
-  /* ── Loading overlay ─────────────────────────────────────── */
-  #loading {
-    position: fixed; inset: 0; background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 999; flex-direction: column; gap: 16px;
-    transition: opacity .3s;
-  }
-  #loading.hide { opacity: 0; pointer-events: none; }
-  .spinner {
-    width: 40px; height: 40px; border: 3px solid var(--border);
-    border-top-color: var(--accent); border-radius: 50%;
-    animation: spin .7s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+/* ═══════════════════════════════ QUICK ACTIONS */
+.action-row {
+  display: flex; flex-direction: column; gap: 2px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+  margin: 10px 14px 0;
+}
+.action-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 15px 16px; cursor: pointer;
+  transition: background .15s;
+  position: relative;
+}
+.action-item:not(:last-child)::after {
+  content: ''; position: absolute; bottom: 0; left: 54px; right: 0;
+  height: 1px; background: var(--border);
+}
+.action-item:hover { background: var(--bg3); }
+.action-item:active { background: var(--bg4); }
+.action-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.action-icon.violet { background: var(--violet-dim); }
+.action-icon.cyan   { background: var(--cyan-dim); }
+.action-icon.green  { background: var(--green-dim); }
+.action-icon.amber  { background: var(--amber-dim); }
+.action-icon svg { width: 18px; height: 18px; }
+.action-text { flex: 1; }
+.action-title { font-size: 14px; font-weight: 600; }
+.action-sub   { font-size: 12px; color: var(--text3); margin-top: 1px; }
+.action-arrow { color: var(--text3); font-size: 16px; }
+.action-badge {
+  background: var(--green); color: #000;
+  font-size: 10px; font-weight: 800;
+  padding: 2px 7px; border-radius: 6px;
+}
 
-  /* ── Toast ───────────────────────────────────────────────── */
-  #toast {
-    position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-80px);
-    background: var(--bg2); border: 1px solid var(--border); color: var(--text);
-    padding: 10px 18px; border-radius: 10px; font-size: 13px;
-    z-index: 9999; transition: transform .3s ease;
-    box-shadow: 0 8px 24px rgba(0,0,0,.4);
-  }
-  #toast.show { transform: translateX(-50%) translateY(0); }
+/* ═══════════════════════════════ AUDIT CARD */
+.audit-card {
+  display: flex; align-items: center; gap: 14px;
+  background: linear-gradient(135deg, #0f0f22, #0a0a1a);
+  border: 1px solid rgba(139,92,246,0.15);
+  border-radius: var(--radius-lg); padding: 16px;
+  margin: 10px 14px 0;
+}
+.audit-icon-wrap {
+  width: 40px; height: 40px; border-radius: 11px;
+  background: var(--violet-dim); border: 1px solid rgba(139,92,246,0.2);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.audit-icon-wrap svg { width: 20px; height: 20px; }
+.audit-body { flex: 1; }
+.audit-title { font-size: 13px; font-weight: 700; }
+.audit-sub   { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.audit-btn {
+  background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text2); border-radius: 8px; padding: 7px 12px;
+  font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--font);
+  white-space: nowrap; flex-shrink: 0;
+}
+
+/* ═══════════════════════════════ VPN PAGE — TOGGLES */
+.period-toggle {
+  display: flex; background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 14px; padding: 4px; margin: 16px 14px 0;
+}
+.period-btn {
+  flex: 1; padding: 10px; border-radius: 11px;
+  background: transparent; border: none; color: var(--text3);
+  font-family: var(--font); font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all .2s;
+}
+.period-btn.active {
+  background: var(--bg4); color: var(--text);
+  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+
+.plan-scroll {
+  display: flex; gap: 8px; overflow-x: auto; padding: 12px 14px 0;
+  scrollbar-width: none;
+}
+.plan-scroll::-webkit-scrollbar { display: none; }
+.plan-pill {
+  flex-shrink: 0; padding: 8px 16px; border-radius: 20px;
+  background: var(--bg2); border: 1px solid var(--border);
+  color: var(--text2); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all .2s;
+}
+.plan-pill.active {
+  background: var(--violet-dim); border-color: rgba(139,92,246,0.4);
+  color: #c4b5fd;
+}
+
+/* ═══════════════════════════════ TARIFF CARD */
+.tariff-card {
+  margin: 12px 14px 0;
+  background: var(--bg2); border: 1.5px solid rgba(139,92,246,0.3);
+  border-radius: var(--radius-xl); overflow: hidden;
+  box-shadow: 0 0 40px rgba(139,92,246,0.08);
+}
+.tariff-header {
+  padding: 18px 18px 16px;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(139,92,246,0.06), transparent);
+}
+.tariff-plan-name  { font-size: 18px; font-weight: 800; letter-spacing: -.02em; }
+.tariff-plan-sub   { font-size: 12px; color: var(--text3); margin-top: 3px; }
+.tariff-price-wrap { text-align: right; }
+.tariff-amount     { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: -.03em; }
+.tariff-period     { font-size: 11px; color: var(--text3); }
+.tariff-old        { font-size: 11px; color: var(--text3); text-decoration: line-through; }
+
+.tariff-feature {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 18px; border-bottom: 1px solid var(--border);
+}
+.tariff-feature:last-child { border-bottom: none; }
+.tf-left  { display: flex; align-items: center; gap: 12px; }
+.tf-icon  {
+  width: 32px; height: 32px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.tf-icon.violet { background: var(--violet-dim); }
+.tf-icon.cyan   { background: var(--cyan-dim); }
+.tf-icon.green  { background: var(--green-dim); }
+.tf-icon.amber  { background: var(--amber-dim); }
+.tf-icon.pink   { background: var(--pink-dim); }
+.tf-icon svg    { width: 16px; height: 16px; }
+.tf-title { font-size: 13px; font-weight: 600; }
+.tf-sub   { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.tf-val   { font-size: 13px; font-weight: 700; color: var(--violet); font-family: 'JetBrains Mono', monospace; }
+.tf-val.cyan  { color: var(--cyan); }
+.tf-val.green { color: var(--green); }
+
+/* ═══════════════════════════════ PAY STICKY */
+.pay-sticky {
+  position: sticky;
+  bottom: calc(var(--tab-h) + var(--safe-bot));
+  padding: 12px 14px;
+  background: linear-gradient(to top, var(--bg) 50%, transparent);
+  z-index: 10;
+}
+.pay-note { font-size: 11px; color: var(--text3); text-align: center; margin-top: 8px; }
+
+/* ═══════════════════════════════ ACTIVE SUB CARD */
+.active-sub-card {
+  margin: 12px 14px 0;
+  background: linear-gradient(135deg, #0a1f12, #071a17);
+  border: 1px solid rgba(74,222,128,0.25);
+  border-radius: var(--radius-xl); padding: 20px;
+  box-shadow: 0 0 40px rgba(74,222,128,0.05);
+}
+.active-sub-title { font-size: 13px; font-weight: 700; color: var(--green); display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.active-sub-date  { font-size: 22px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 16px; }
+
+/* ═══════════════════════════════ CONFIG BOX */
+.config-box {
+  background: var(--bg); border: 1px solid var(--border2);
+  border-radius: 12px; padding: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--cyan); word-break: break-all;
+  line-height: 1.7; letter-spacing: .02em;
+  max-height: 100px; overflow: auto;
+}
+.copy-row { display: flex; gap: 8px; margin-top: 10px; }
+
+/* ═══════════════════════════════ STATS ROW */
+.stat-row {
+  display: flex; gap: 8px; margin: 10px 14px 0;
+}
+.stat-box {
+  flex: 1; background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px; text-align: center;
+  position: relative; overflow: hidden;
+}
+.stat-box::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent);
+}
+.stat-val   { font-size: 22px; font-weight: 800; letter-spacing: -.03em; }
+.stat-val.cyan   { color: var(--cyan); text-shadow: 0 0 12px var(--cyan-glow); }
+.stat-val.violet { color: var(--violet); }
+.stat-val.amber  { color: var(--amber); }
+.stat-label { font-size: 10px; font-weight: 600; color: var(--text3); margin-top: 3px; text-transform: uppercase; letter-spacing: .08em; }
+
+/* ═══════════════════════════════ REFERRALS */
+.ref-link-box {
+  background: var(--bg); border: 1px solid var(--border2);
+  border-radius: 12px; padding: 12px 14px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  color: var(--cyan); word-break: break-all; line-height: 1.6;
+}
+.progress-track {
+  display: flex; align-items: center; gap: 6px; margin-top: 16px;
+}
+.progress-dot-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+.progress-dot {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--bg3); border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  transition: all .3s;
+}
+.progress-dot svg { width: 18px; height: 18px; color: var(--text3); transition: color .3s; }
+.progress-dot.done {
+  border-color: var(--green); background: var(--green-dim);
+  box-shadow: 0 0 12px var(--green-glow);
+}
+.progress-dot.done svg { color: var(--green); }
+.progress-num { font-size: 10px; color: var(--text3); font-weight: 600; }
+.progress-line { flex: 1; height: 2px; background: var(--border); border-radius: 2px; margin-bottom: 14px; }
+.progress-line.done { background: var(--green); box-shadow: 0 0 6px var(--green-glow); }
+
+.reward-card {
+  display: flex; align-items: flex-start; gap: 14px;
+  margin: 10px 14px 0;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 16px;
+}
+.reward-icon-wrap {
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  background: var(--amber-dim); border: 1px solid rgba(251,191,36,0.2);
+  display: flex; align-items: center; justify-content: center;
+}
+.reward-icon-wrap svg { width: 22px; height: 22px; color: var(--amber); }
+.reward-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.reward-sub   { font-size: 12px; color: var(--text3); line-height: 1.5; }
+
+.balance-row {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 16px 18px;
+  margin: 10px 14px 0;
+}
+.balance-val { font-size: 26px; font-weight: 800; color: var(--green); letter-spacing: -.03em; }
+.balance-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+
+/* ═══════════════════════════════ PROFILE */
+.profile-hero {
+  margin: 12px 14px 0;
+  background: linear-gradient(145deg, #0f0f28, #0a0a1e);
+  border: 1px solid rgba(139,92,246,0.2);
+  border-radius: var(--radius-xl); padding: 22px 20px 18px;
+  position: relative; overflow: hidden;
+}
+.profile-hero::before {
+  content: ''; position: absolute;
+  width: 220px; height: 220px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+  top: -60px; right: -50px; pointer-events: none;
+}
+.sub-badge-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 8px; margin-bottom: 14px;
+}
+.sub-badge-pill.active   { background: var(--green-dim); color: var(--green); border: 1px solid rgba(74,222,128,.25); }
+.sub-badge-pill.inactive { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(248,113,113,.2); }
+.profile-name    { font-size: 22px; font-weight: 800; letter-spacing: -.03em; }
+.profile-handle  { font-size: 13px; color: var(--text2); margin-top: 3px; }
+.profile-meta    { display: flex; gap: 24px; margin-top: 16px; }
+.pm-item label   { font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: .1em; font-weight: 700; }
+.pm-item p       { font-size: 11px; font-weight: 600; margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+
+.data-list {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+  margin: 10px 14px 0;
+}
+.data-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; position: relative;
+}
+.data-item:not(:last-child)::after {
+  content: ''; position: absolute; bottom: 0; left: 54px; right: 0;
+  height: 1px; background: var(--border);
+}
+.data-item-icon {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.data-item-icon.violet { background: var(--violet-dim); }
+.data-item-icon.cyan   { background: var(--cyan-dim); }
+.data-item-icon.green  { background: var(--green-dim); }
+.data-item-icon svg    { width: 17px; height: 17px; }
+.data-item-body { flex: 1; min-width: 0; }
+.data-item-label { font-size: 11px; color: var(--text3); font-weight: 600; margin-bottom: 2px; }
+.data-item-val   { font-size: 13px; font-weight: 600; font-family: 'JetBrains Mono', monospace; truncate; }
+.data-item-val.red   { color: var(--red); }
+.data-item-val.green { color: var(--green); }
+.data-item-action {
+  background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text2); border-radius: 8px; padding: 6px 12px;
+  font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--font);
+  white-space: nowrap; flex-shrink: 0; transition: color .15s;
+}
+.data-item-action:hover { color: var(--text); }
+
+/* Input */
+.input-row { display: flex; gap: 8px; align-items: center; }
+.input-field {
+  flex: 1; background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text); border-radius: 10px; padding: 10px 13px;
+  font-size: 13px; font-family: var(--font); outline: none;
+  transition: border-color .2s;
+}
+.input-field:focus { border-color: rgba(139,92,246,0.5); }
+.input-field::placeholder { color: var(--text3); }
+.link-btn {
+  width: 38px; height: 38px; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--text3); flex-shrink: 0; transition: color .2s;
+}
+.link-btn:hover { color: var(--violet); }
+.link-btn svg { width: 16px; height: 16px; }
+
+/* Settings */
+.settings-section { display: none; margin: 10px 14px 0; }
+.settings-block {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 10px;
+}
+.settings-row {
+  display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+  position: relative;
+}
+.settings-row:not(:last-child)::after {
+  content: ''; position: absolute; bottom: 0; left: 54px; right: 0;
+  height: 1px; background: var(--border);
+}
+.settings-row-title { font-size: 14px; font-weight: 600; }
+.settings-row-sub   { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.support-code-box {
+  background: var(--bg); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 12px 14px; margin-top: 10px;
+}
+.support-code-val {
+  font-family: 'JetBrains Mono', monospace; font-size: 18px;
+  font-weight: 600; color: var(--cyan); letter-spacing: .06em;
+}
+
+/* ═══════════════════════════════ WITHDRAW FORM */
+.withdraw-form {
+  display: none;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 18px;
+  margin: 10px 14px 0;
+}
+
+/* ═══════════════════════════════ QR WRAP */
+.qr-wrap {
+  width: 140px; height: 140px; background: #fff;
+  border-radius: 12px; margin: 0 auto 14px;
+  display: flex; align-items: center; justify-content: center;
+  color: #000; font-size: 11px; text-align: center;
+  font-family: var(--font); font-weight: 600;
+}
+
+/* ═══════════════════════════════ TAB BAR */
+.tab-bar {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  background: rgba(13,13,26,0.92); backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex; padding: 8px 8px calc(var(--safe-bot) + 8px);
+  height: var(--tab-h); align-items: flex-start;
+  z-index: 100;
+}
+.tab-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: pointer; padding: 7px 4px; border-radius: 12px;
+  transition: background .15s;
+}
+.tab-item:hover { background: var(--bg3); }
+.tab-item.active .tab-icon-wrap { color: var(--cyan); }
+.tab-item.active .tab-label     { color: var(--cyan); }
+.tab-item.active .tab-icon-bg   { background: var(--cyan-dim); box-shadow: 0 0 10px var(--cyan-glow); }
+.tab-icon-bg {
+  width: 32px; height: 32px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s, box-shadow .2s;
+  background: transparent;
+}
+.tab-icon-wrap { color: var(--text3); transition: color .2s; }
+.tab-icon-wrap svg { width: 18px; height: 18px; }
+.tab-label { font-size: 10px; font-weight: 600; color: var(--text3); transition: color .2s; letter-spacing: .02em; }
+
+/* ═══════════════════════════════ LOADING */
+#loading {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999; flex-direction: column; gap: 20px;
+  transition: opacity .35s;
+}
+#loading.hide { opacity: 0; pointer-events: none; }
+.loader-logo {
+  width: 64px; height: 64px; border-radius: 18px;
+  background: linear-gradient(135deg, var(--violet), var(--cyan));
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 30px var(--violet-glow), 0 0 60px var(--cyan-glow);
+  animation: logoPulse 2s ease infinite;
+}
+.loader-logo svg { width: 34px; height: 34px; color: #fff; }
+@keyframes logoPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+.loader-text { font-size: 13px; color: var(--text3); font-weight: 500; }
+
+/* ═══════════════════════════════ TOAST */
+#toast {
+  position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-70px);
+  background: var(--bg3); border: 1px solid var(--border2); color: var(--text);
+  padding: 10px 18px; border-radius: 12px; font-size: 13px; font-weight: 500;
+  z-index: 9998; transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: 0 8px 32px rgba(0,0,0,.5); white-space: nowrap;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ═══════════════════════════════ SAVE BADGE */
+.save-badge {
+  background: linear-gradient(135deg, var(--green), #16a34a);
+  color: #fff; font-size: 11px; font-weight: 800;
+  padding: 7px 14px; border-radius: 10px; text-align: center;
+  margin: 10px 14px 0; letter-spacing: .02em;
+  box-shadow: 0 4px 16px rgba(74,222,128,0.2);
+}
+
+/* ═══════════════════════════════ PAGE TITLE */
+.page-title {
+  padding: 20px 16px 0; text-align: center;
+}
+.page-title h1 { font-size: 22px; font-weight: 800; letter-spacing: -.03em; }
+.page-title p  { font-size: 13px; color: var(--text2); margin-top: 4px; }
 </style>
 </head>
 <body>
 
+<!-- Ambient glows -->
+<div class="glow-orb glow-orb-1"></div>
+<div class="glow-orb glow-orb-2"></div>
+<div class="glow-orb glow-orb-3"></div>
+
+<!-- Loading -->
 <div id="loading">
-  <div class="spinner"></div>
-  <span style="font-size:13px;color:var(--muted)">Загрузка...</span>
+  <div class="loader-logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </svg>
+  </div>
+  <div class="loader-text">Загрузка VPN-панели...</div>
 </div>
+
 <div id="toast"></div>
 
-<!-- ═══════════════════════════════════════════════════════════ HOME PAGE -->
+<!-- ═══════════════════════════════════ HOME PAGE ══════════════ -->
 <div class="page active" id="page-home">
+
   <div class="top-bar">
-    <div class="avatar-wrap">
+    <div class="user-pill">
       <div class="avatar" id="home-avatar">X</div>
-      <div class="user-info">
-        <span class="user-name" id="home-username">Загрузка...</span>
-        <span class="user-sub" id="home-sub-status">Нет подписки</span>
-      </div>
+      <span class="user-name-sm" id="home-username">Загрузка...</span>
     </div>
-    <a class="help-btn" onclick="showSettings()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 1 0 0 14.14"/></svg>
-      <span>Настройки</span>
-    </a>
+    <button class="help-btn" onclick="showSettings()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 1 0 0 14.14"/>
+        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42"/>
+      </svg>
+    </button>
   </div>
 
-  <!-- audit badge -->
-  <div class="audit-card">
-    <span class="audit-icon">🔒</span>
-    <div class="audit-text">
-      <div class="audit-title">Мы прошли аудит безопасности!</div>
-      <div class="audit-sub">Независимое подтверждение прозрачности</div>
-    </div>
-    <span class="audit-by" style="color:var(--muted);font-size:10px">by aetris</span>
-  </div>
-
-  <!-- status banner -->
-  <div class="status-banner unprotected" id="status-banner">
-    <div class="status-left">
+  <!-- Status hero -->
+  <div class="status-hero unprotected" id="status-hero">
+    <div class="status-hero-glow"></div>
+    <div class="status-indicator">
       <div class="status-dot red" id="status-dot"></div>
+      <span class="status-label" id="status-label">Нет защиты</span>
+    </div>
+    <div class="status-title" id="status-title">Вы не защищены</div>
+    <div class="status-sub" id="status-sub">Обход РКН · 50+ локаций · VLESS Reality</div>
+    <div class="discount-chip" id="discount-chip">-79%</div>
+  </div>
+
+  <!-- Feature chips -->
+  <div class="chips-row">
+    <div class="chip cyan">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Обход РКН
+    </div>
+    <div class="chip violet">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      50+ локаций
+    </div>
+    <div class="chip green">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Без лимитов
+    </div>
+  </div>
+
+  <!-- Audit -->
+  <div class="audit-card">
+    <div class="audit-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <polyline points="9 12 11 14 15 10"/>
+      </svg>
+    </div>
+    <div class="audit-body">
+      <div class="audit-title">Аудит безопасности пройден</div>
+      <div class="audit-sub">Независимая проверка · by aetris</div>
+    </div>
+    <button class="audit-btn">Изучить</button>
+  </div>
+
+  <!-- Trial card -->
+  <div class="card" id="trial-card" style="display:none; border-color: rgba(74,222,128,0.2);">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <div style="width:36px;height:36px;border-radius:10px;background:var(--green-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </div>
       <div>
-        <div class="status-text" id="status-text">Вы не защищены</div>
-        <div class="status-sub" id="status-sub">Подключите VPN для защиты</div>
+        <div style="font-size:14px;font-weight:700;color:var(--green)">Пробный период активен!</div>
+        <div style="font-size:12px;color:var(--text3)">Попробуйте VPN бесплатно</div>
       </div>
     </div>
-    <div class="badge-discount" id="sub-badge">-79%<br>СКИДКА</div>
+    <button class="btn btn-green" onclick="getConfig()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Получить конфиг
+    </button>
   </div>
 
-  <div class="features" style="margin-top:10px">
-    <span class="feat-chip">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Обход БС
-    </span>
-    <span class="feat-chip">🌍 50+ локаций</span>
-    <span class="feat-chip">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-      Без лимитов
-    </span>
+  <!-- CTA -->
+  <div style="padding: 12px 14px 0;">
+    <button class="btn btn-primary" onclick="switchTab('vpn')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Купить подписку
+    </button>
   </div>
 
-  <div style="padding: 16px 16px 0;">
-    <button class="btn btn-primary" onclick="switchTab('vpn')">Купить подписку</button>
-  </div>
-
-  <div class="card" id="trial-card" style="display:none">
-    <div class="card-title">🎁 Пробный период</div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Ваш пробный VPN активен!</div>
-    <button class="btn btn-green" onclick="getConfig()">🔑 Получить конфиг</button>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <div class="card-title">Быстрые действия</div>
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <button class="btn btn-outline" style="justify-content:flex-start" onclick="switchTab('referrals')">
-        👥 Пригласить друзей — 15% с каждой оплаты
-      </button>
-      <button class="btn btn-outline" style="justify-content:flex-start" onclick="getConfig()">
-        🔐 Получить VPN конфиг
-      </button>
+  <!-- Quick actions -->
+  <div class="action-row">
+    <div class="action-item" onclick="switchTab('referrals')">
+      <div class="action-icon violet">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <div class="action-text">
+        <div class="action-title">Пригласить друзей</div>
+        <div class="action-sub">15% с каждой оплаты</div>
+      </div>
+      <div class="action-badge">15%</div>
+      <div class="action-arrow">›</div>
+    </div>
+    <div class="action-item" onclick="getConfig()">
+      <div class="action-icon cyan">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#00f5ff" stroke-width="2" stroke-linecap="round">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
+      <div class="action-text">
+        <div class="action-title">Получить VPN конфиг</div>
+        <div class="action-sub">VLESS · QR-код · ссылка</div>
+      </div>
+      <div class="action-arrow">›</div>
+    </div>
+    <div class="action-item" onclick="switchTab('vpn')">
+      <div class="action-icon green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </div>
+      <div class="action-text">
+        <div class="action-title">Статистика трафика</div>
+        <div class="action-sub">Трафик использовано сегодня</div>
+      </div>
+      <div class="action-arrow">›</div>
     </div>
   </div>
+
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ VPN PAGE -->
+<!-- ═══════════════════════════════════ VPN PAGE ════════════════ -->
 <div class="page" id="page-vpn">
-  <div style="padding: 16px 16px 0; text-align:center">
-    <div style="font-size:20px;font-weight:700;margin-bottom:4px">Выберите тариф</div>
-    <div style="font-size:13px;color:var(--muted)">VLESS · Reality · Без логов</div>
+
+  <div class="page-title">
+    <h1>Выберите тариф</h1>
+    <p>VLESS · Reality · Без логов · 50+ серверов</p>
   </div>
 
-  <div class="toggle-row">
-    <button class="toggle-btn active" id="toggle-year" onclick="selectPeriod('year')">Годовой</button>
-    <button class="toggle-btn" id="toggle-month" onclick="selectPeriod('month')">Месячный</button>
+  <div class="period-toggle">
+    <button class="period-btn active" id="period-year"  onclick="selectPeriod('year')">Годовой</button>
+    <button class="period-btn"        id="period-month" onclick="selectPeriod('month')">Месячный</button>
   </div>
 
-  <div class="save-badge" style="margin:8px 16px 0">🎉 Экономия до 45% при оплате за год</div>
+  <div class="save-badge">🎉 Экономия до 45% при оплате за год</div>
 
-  <div class="plan-chips" id="plan-chips">
-    <div class="plan-chip active" onclick="selectPlan(this,'personal')">Личный</div>
-    <div class="plan-chip" onclick="selectPlan(this,'family')">Семейный</div>
-    <div class="plan-chip" onclick="selectPlan(this,'max')">Максимальный</div>
-    <div class="plan-chip" onclick="selectPlan(this,'game')">Игровой</div>
+  <div class="plan-scroll">
+    <div class="plan-pill active" onclick="selectPlan(this,'personal')">Личный</div>
+    <div class="plan-pill"       onclick="selectPlan(this,'family')">Семейный</div>
+    <div class="plan-pill"       onclick="selectPlan(this,'max')">Максимальный</div>
+    <div class="plan-pill"       onclick="selectPlan(this,'game')">Игровой</div>
   </div>
 
-  <div class="tariff-card" id="tariff-card">
+  <div class="tariff-card">
     <div class="tariff-header">
       <div>
-        <div class="tariff-name" id="t-name">Личный</div>
-        <div class="tariff-desc">Для личного использования</div>
+        <div class="tariff-plan-name" id="t-name">Личный</div>
+        <div class="tariff-plan-sub">Для личного использования</div>
       </div>
-      <div class="tariff-price">
+      <div class="tariff-price-wrap">
         <div class="tariff-amount" id="t-price">$3.00</div>
-        <div class="tariff-period">/мес · годовая</div>
-        <div class="tariff-old" id="t-old">$5.00/мес</div>
+        <div class="tariff-period" id="t-period">/мес · годовая</div>
+        <div class="tariff-old"    id="t-old">$5.00/мес</div>
       </div>
     </div>
-    <div class="tariff-row">
-      <div class="tariff-row-left">
-        <div class="tariff-row-icon">🔒</div>
-        <div><div class="tariff-row-label">Обход белых списков</div><div class="tariff-row-sub">Стандартные сервера</div></div>
+    <div class="tariff-feature">
+      <div class="tf-left">
+        <div class="tf-icon violet">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div><div class="tf-title">Обход РКН / белых списков</div><div class="tf-sub">Стандартные сервера</div></div>
       </div>
-      <span class="tariff-row-val">✓</span>
+      <span class="tf-val">✓</span>
     </div>
-    <div class="tariff-row">
-      <div class="tariff-row-left">
-        <div class="tariff-row-icon">⭐</div>
-        <div><div class="tariff-row-label">Полный обход</div><div class="tariff-row-sub">Без ограничений трафика</div></div>
+    <div class="tariff-feature">
+      <div class="tf-left">
+        <div class="tf-icon cyan">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#00f5ff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <div><div class="tf-title">Зарубежные сервера</div><div class="tf-sub">50+ локаций · Безлимит</div></div>
       </div>
-      <span class="tariff-row-val">∞</span>
+      <span class="tf-val cyan">∞</span>
     </div>
-    <div class="tariff-row">
-      <div class="tariff-row-left">
-        <div class="tariff-row-icon">🖥</div>
-        <div><div class="tariff-row-label">Устройства</div><div class="tariff-row-sub">Одновременных подключений</div></div>
+    <div class="tariff-feature">
+      <div class="tf-left">
+        <div class="tf-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div><div class="tf-title">Устройства</div><div class="tf-sub">Одновременных подключений</div></div>
       </div>
-      <span class="tariff-row-val" id="t-devices">2</span>
+      <span class="tf-val green" id="t-devices">2</span>
     </div>
-    <div class="tariff-row">
-      <div class="tariff-row-left">
-        <div class="tariff-row-icon">⚡</div>
-        <div><div class="tariff-row-label">Скорость</div><div class="tariff-row-sub">Без ограничений</div></div>
+    <div class="tariff-feature">
+      <div class="tf-left">
+        <div class="tf-icon amber">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div><div class="tf-title">Скорость</div><div class="tf-sub">Без ограничений</div></div>
       </div>
-      <span class="tariff-row-val">∞</span>
+      <span class="tf-val" style="color:var(--amber)">∞</span>
     </div>
-    <div class="tariff-row">
-      <div class="tariff-row-left">
-        <div class="tariff-row-icon">🛡</div>
-        <div><div class="tariff-row-label">Протоколы</div></div>
+    <div class="tariff-feature">
+      <div class="tf-left">
+        <div class="tf-icon pink">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <div><div class="tf-title">Протоколы</div></div>
       </div>
-      <span style="font-size:12px;color:var(--accentB);font-weight:600">VLESS · Reality</span>
+      <span style="font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--pink)">VLESS · Reality</span>
+    </div>
+  </div>
+
+  <!-- Active sub section -->
+  <div class="active-sub-card" id="active-sub-card" style="display:none">
+    <div class="active-sub-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+      Подписка активна
+    </div>
+    <div class="active-sub-date" id="sub-end-date">—</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-green" style="flex:1" onclick="getConfig()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Конфиг + QR
+      </button>
+      <button class="btn btn-outline" style="flex:1" onclick="getStats()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Трафик
+      </button>
+    </div>
+  </div>
+
+  <!-- Config section -->
+  <div class="card" id="config-section" style="display:none; border-color:rgba(0,245,255,0.2)">
+    <div class="card-label" style="color:var(--cyan)">Ваш VLESS конфиг</div>
+    <div class="qr-wrap">QR-код<br>придёт в чате</div>
+    <div class="config-box" id="config-text">vless://...получение...</div>
+    <div class="copy-row">
+      <button class="btn btn-outline" style="flex:1" onclick="copyConfig()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Копировать
+      </button>
+      <button class="btn btn-outline" style="flex:1" onclick="shareConfig()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Поделиться
+      </button>
+    </div>
+    <div style="margin-top:14px;background:var(--bg3);border-radius:10px;padding:12px;font-size:12px;color:var(--text2);line-height:1.7">
+      <div style="font-weight:700;color:var(--text);margin-bottom:6px">Как подключиться:</div>
+      📱 Android — <span style="color:var(--cyan);font-weight:600">v2rayNG</span> / NekoBox<br>
+      🍎 iOS — <span style="color:var(--cyan);font-weight:600">Streisand</span> / FoXray<br>
+      🖥 PC — <span style="color:var(--cyan);font-weight:600">Hiddify</span> / v2rayN
     </div>
   </div>
 
   <div class="pay-sticky">
-    <button class="btn btn-blue" id="pay-btn" onclick="startPayment()">
+    <button class="btn btn-primary" onclick="startPayment()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
       Оплатить <span id="pay-label">$36 за год</span>
     </button>
-    <div class="pay-fine">Отмена в любое время · Безопасная оплата</div>
+    <div class="pay-note">Отмена в любое время · Безопасная оплата CryptoPay</div>
   </div>
 
-  <!-- Sub is active section -->
-  <div class="card" id="active-sub-card" style="display:none;margin-top:0">
-    <div class="card-title">✅ Подписка активна</div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:12px">
-      Действует до: <span id="sub-end-date" style="color:var(--text);font-weight:600">—</span>
-    </div>
-    <button class="btn btn-green" onclick="getConfig()" style="margin-bottom:10px">🔐 Получить конфиг</button>
-    <button class="btn btn-outline" onclick="getStats()">📊 Статистика трафика</button>
-  </div>
-
-  <!-- Config display -->
-  <div class="card" id="config-section" style="display:none">
-    <div class="card-title">🔑 Ваш VLESS конфиг</div>
-    <div class="qr-wrap" id="qr-wrap" style="margin-bottom:14px">
-      <span>QR-код<br>придёт в чате</span>
-    </div>
-    <div class="config-box" id="config-text">vless://...получение...</div>
-    <div class="copy-row">
-      <button class="btn btn-outline" onclick="copyConfig()">📋 Копировать</button>
-      <button class="btn btn-outline" onclick="shareConfig()">📤 Поделиться</button>
-    </div>
-    <div style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6">
-      📱 <b>Android:</b> v2rayNG, NekoBox<br>
-      🍎 <b>iOS:</b> Streisand, FoXray<br>
-      🖥 <b>PC:</b> v2rayN, Hiddify
-    </div>
-  </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ REFERRALS -->
+<!-- ═══════════════════════════════════ REFERRALS ════════════════ -->
 <div class="page" id="page-referrals">
-  <div style="padding: 20px 16px 0; text-align:center">
-    <div style="font-size:22px;font-weight:700;margin-bottom:6px">Пригласи друзей</div>
-    <div style="font-size:13px;color:var(--muted)">Получай бесплатные недели подписки<br>за каждого приглашённого друга</div>
+
+  <div class="page-title">
+    <h1>Пригласи друзей</h1>
+    <p>Получай недели подписки и денежные бонусы</p>
   </div>
 
   <div class="stat-row">
-    <div class="stat-box"><div class="stat-val" id="ref-count">0</div><div class="stat-label">Рефералов</div></div>
-    <div class="stat-box"><div class="stat-val" id="ref-weeks">0</div><div class="stat-label">Недель получено</div></div>
-    <div class="stat-box"><div class="stat-val" id="ref-earned">$0</div><div class="stat-label">Заработано</div></div>
+    <div class="stat-box">
+      <div class="stat-val cyan" id="ref-count">0</div>
+      <div class="stat-label">Рефералов</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val violet" id="ref-weeks">0</div>
+      <div class="stat-label">Недель получено</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val amber" id="ref-earned">$0</div>
+      <div class="stat-label">Заработано</div>
+    </div>
   </div>
 
   <div class="card">
-    <div class="card-title">ТВОЯ ССЫЛКА</div>
+    <div class="card-label">Твоя реферальная ссылка</div>
     <div class="ref-link-box" id="ref-link-text">https://t.me/YourBot?start=ref_...</div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-outline" onclick="shareRef()">📤 Отправить друзьям</button>
-      <button class="btn btn-outline" onclick="copyRef()">📋 Копировать</button>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-primary" style="flex:1" onclick="shareRef()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Отправить
+      </button>
+      <button class="btn btn-outline" style="flex:1" onclick="copyRef()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Копировать
+      </button>
     </div>
   </div>
 
+  <!-- Progress -->
   <div class="card">
-    <div class="card-title">🎯 Прогресс</div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Пригласи 4 друга — получи неделю подписки бесплатно</div>
-    <div class="progress-row" id="progress-dots">
-      <div style="text-align:center"><div class="progress-dot" id="dot-1">👤</div><div class="progress-num">1</div></div>
-      <div style="text-align:center"><div class="progress-dot" id="dot-2">👤</div><div class="progress-num">2</div></div>
-      <div style="text-align:center"><div class="progress-dot" id="dot-3">👤</div><div class="progress-num">3</div></div>
-      <div style="text-align:center"><div class="progress-dot" id="dot-4">👤</div><div class="progress-num">4</div></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div style="display:flex;align-items:center;gap:12px">
-      <div style="font-size:28px">💰</div>
-      <div>
-        <div style="font-size:14px;font-weight:600">15% с покупок друзей</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px">Если друг купил подписку — ты получаешь 15% от суммы его покупки на баланс</div>
+    <div class="card-label">Прогресс</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Пригласи 4 друга — получи неделю подписки бесплатно</div>
+    <div class="progress-track">
+      <div class="progress-dot-wrap">
+        <div class="progress-dot" id="dot-1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="progress-num">1</div>
+      </div>
+      <div class="progress-line" id="pline-1"></div>
+      <div class="progress-dot-wrap">
+        <div class="progress-dot" id="dot-2">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="progress-num">2</div>
+      </div>
+      <div class="progress-line" id="pline-2"></div>
+      <div class="progress-dot-wrap">
+        <div class="progress-dot" id="dot-3">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="progress-num">3</div>
+      </div>
+      <div class="progress-line" id="pline-3"></div>
+      <div class="progress-dot-wrap">
+        <div class="progress-dot" id="dot-4">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="progress-num">4</div>
       </div>
     </div>
-    <div class="divider" style="margin-top:14px"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
-      <div>
-        <div style="font-size:12px;color:var(--muted)">Ваш баланс</div>
-        <div style="font-size:18px;font-weight:700" id="balance-display">$0.00</div>
-      </div>
-      <button class="btn btn-green" style="width:auto;padding:10px 16px;font-size:13px" onclick="showWithdraw()">Вывести</button>
+  </div>
+
+  <!-- Reward info -->
+  <div class="reward-card">
+    <div class="reward-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+      </svg>
+    </div>
+    <div>
+      <div class="reward-title">20% с покупок друзей</div>
+      <div class="reward-sub">Если друг купил подписку — ты получаешь 15% от суммы его покупки на баланс. Минимум для вывода: $5 USDT.</div>
     </div>
   </div>
 
-  <!-- Withdrawal form -->
-  <div class="card" id="withdraw-form" style="display:none">
-    <div class="card-title">💸 Вывод средств</div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Минимальная сумма: $5.00 USDT</div>
-    <input class="input-field" id="withdraw-amount" type="number" placeholder="Сумма в USDT" min="5" step="0.01"/>
-    <input class="input-field" id="withdraw-wallet" type="text" placeholder="USDT-кошелёк (TRC20 / TON)" style="margin-top:8px"/>
-    <button class="btn btn-blue" style="margin-top:12px" onclick="submitWithdraw()">Отправить заявку</button>
+  <!-- Balance + withdraw -->
+  <div class="balance-row">
+    <div>
+      <div class="balance-label">Ваш баланс</div>
+      <div class="balance-val" id="balance-display">$0.00</div>
+    </div>
+    <button class="btn btn-green" style="width:auto;padding:12px 20px" onclick="toggleWithdraw()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+      Вывести
+    </button>
   </div>
+
+  <div class="withdraw-form" id="withdraw-form">
+    <div class="card-label">Вывод средств</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px">Минимальная сумма: $5.00 USDT</div>
+    <input class="input-field" id="withdraw-amount" type="number" placeholder="Сумма в USDT" min="5" step="0.01" style="width:100%;margin-bottom:8px"/>
+    <input class="input-field" id="withdraw-wallet" type="text"   placeholder="USDT-кошелёк (TRC20 / TON)" style="width:100%;margin-bottom:12px"/>
+    <button class="btn btn-cyan" onclick="submitWithdraw()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      Отправить заявку
+    </button>
+  </div>
+
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ PROFILE -->
+<!-- ═══════════════════════════════════ PROFILE ════════════════ -->
 <div class="page" id="page-profile">
-  <div class="profile-hero" id="profile-hero">
-    <div id="profile-sub-badge" class="sub-inactive">Без подписки</div>
-    <div class="avatar" style="width:44px;height:44px;font-size:18px;margin-bottom:10px" id="profile-avatar">X</div>
-    <div class="profile-username" id="profile-name">Пользователь</div>
+
+  <!-- Hero -->
+  <div class="profile-hero">
+    <div class="sub-badge-pill inactive" id="profile-sub-badge">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      Без подписки
+    </div>
+    <div class="profile-name"   id="profile-name">Пользователь</div>
     <div class="profile-handle" id="profile-handle">@username</div>
     <div class="profile-meta">
-      <div class="profile-meta-item"><label>В СИСТЕМЕ С</label><p id="profile-since">—</p></div>
-      <div class="profile-meta-item" style="text-align:right"><label>ID</label><p id="profile-uuid">—</p></div>
+      <div class="pm-item"><label>В системе с</label><p id="profile-since">—</p></div>
+      <div class="pm-item"><label>UUID</label><p id="profile-uuid">—</p></div>
     </div>
   </div>
 
-  <!-- Data section -->
-  <div class="card">
-    <div class="section-header" style="margin-bottom:12px;background:transparent;padding:0">
-      <div class="section-icon orange">👤</div>
-      <div><div class="section-title">Данные</div><div class="section-sub">Контактная информация</div></div>
+  <!-- Data -->
+  <div class="data-list">
+    <div class="data-item">
+      <div class="data-item-icon violet">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div class="data-item-body">
+        <div class="data-item-label">ID Аккаунта</div>
+        <div class="data-item-val" id="d-uuid">—</div>
+      </div>
+      <button class="data-item-action" onclick="copyUUID()">Копировать</button>
     </div>
-    <div class="data-row">
-      <div><label>ID Аккаунта</label><div class="data-row-val" id="d-uuid">—</div></div>
-      <button class="copy-small" onclick="copyUUID()">📋 Копировать</button>
-    </div>
-    <div class="data-row">
-      <div style="flex:1">
-        <label>Email</label>
-        <div class="data-row-val red" id="d-email-status">Не привязан</div>
-        <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-          <input class="input-field" id="email-input" type="email" placeholder="email@example.com" style="flex:1;margin-top:0"/>
-          <button class="link-icon" onclick="linkEmail()">🔗</button>
+    <div class="data-item">
+      <div class="data-item-icon cyan">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#00f5ff" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </div>
+      <div class="data-item-body">
+        <div class="data-item-label">Email</div>
+        <div class="data-item-val red" id="d-email-status">Не привязан</div>
+        <div class="input-row" style="margin-top:8px">
+          <input class="input-field" id="email-input" type="email" placeholder="email@example.com"/>
+          <button class="link-btn" onclick="linkEmail()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </button>
         </div>
       </div>
     </div>
-    <div class="data-row">
-      <div><label>Telegram</label><div class="data-row-val" id="d-tg">@username</div></div>
+    <div class="data-item">
+      <div class="data-item-icon violet">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </div>
+      <div class="data-item-body">
+        <div class="data-item-label">Telegram</div>
+        <div class="data-item-val" id="d-tg">@username</div>
+      </div>
     </div>
-    <div class="data-row">
-      <div><label>Баланс</label><div class="data-row-val" style="color:var(--accent)" id="d-balance">$0.00</div></div>
-      <button class="btn btn-outline" style="width:auto;padding:8px 14px;font-size:12px" onclick="switchTab('referrals')">Пополнить</button>
+    <div class="data-item">
+      <div class="data-item-icon green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      </div>
+      <div class="data-item-body">
+        <div class="data-item-label">Баланс</div>
+        <div class="data-item-val green" id="d-balance">$0.00</div>
+      </div>
+      <button class="data-item-action" onclick="switchTab('referrals')">Пополнить</button>
     </div>
   </div>
 
   <!-- Security -->
-  <div class="card">
-    <div class="section-header" style="margin-bottom:4px;background:transparent;padding:0">
-      <div class="section-icon blue">🛡</div>
-      <div><div class="section-title">Безопасность</div><div class="section-sub">Защита вашего аккаунта</div></div>
+  <div class="data-list" style="margin-top:10px">
+    <div class="data-item">
+      <div class="data-item-icon" style="background:rgba(0,245,255,0.1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#00f5ff" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="data-item-body">
+        <div class="data-item-label">Безопасность</div>
+        <div class="data-item-val">Управление устройствами</div>
+      </div>
+      <span style="color:var(--text3);font-size:18px">›</span>
     </div>
-    <div class="data-row" style="padding-top:8px">
-      <div><div class="tariff-row-label">Сеансы</div><div class="tariff-row-sub">Управление устройствами</div></div>
-      <span style="color:var(--muted);font-size:18px">›</span>
-    </div>
-    <div class="data-row" id="sub-status-row">
-      <div><div class="tariff-row-label">Подписка не активна</div><div class="tariff-row-sub">Купите тариф, чтобы подключить устройства</div></div>
-      <button class="btn btn-outline" style="width:auto;padding:8px 14px;font-size:12px" onclick="switchTab('vpn')">Купить</button>
+    <div class="data-item" id="sub-status-row">
+      <div class="data-item-icon" style="background:rgba(248,113,113,0.12)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div class="data-item-body">
+        <div class="data-item-val" style="color:var(--red)">Подписка не активна</div>
+        <div class="data-item-label" style="font-size:11px;margin-top:2px">Купите тариф для подключения</div>
+      </div>
+      <button class="btn-ghost" onclick="switchTab('vpn')">Купить</button>
     </div>
   </div>
 
-  <!-- Settings / Support -->
-  <div class="card" id="settings-section" style="display:none">
-    <div style="font-size:16px;font-weight:700;margin-bottom:16px">Настройки</div>
-    <div style="margin-bottom:14px">
-      <div class="card-title">Язык</div>
-      <div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:10px;padding:12px 14px">
-        🇷🇺 Русский
+  <!-- Settings (shown on gear click) -->
+  <div class="settings-section" id="settings-section">
+    <div class="settings-block">
+      <div class="settings-row">
+        <div class="data-item-icon" style="background:var(--violet-dim)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" width="17" height="17"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 1 0 0 14.14"/></svg>
+        </div>
+        <div style="flex:1">
+          <div class="settings-row-title">Язык</div>
+          <div class="settings-row-sub">🇷🇺 Русский</div>
+        </div>
+        <span style="color:var(--text3)">›</span>
       </div>
     </div>
-    <div style="margin-bottom:14px">
-      <div class="card-title">История платежей</div>
-      <div id="payment-history-list" style="font-size:13px;color:var(--muted);padding:8px 0">История пуста</div>
-    </div>
-    <div class="card-title">Нужна помощь?</div>
-    <div style="background:var(--bg3);border-radius:10px;padding:12px 14px;margin-bottom:10px">
-      <div style="font-size:13px;font-weight:600;margin-bottom:4px">Ваш саппорт-код</div>
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:14px" id="support-code">—</div>
-        <button class="copy-small" onclick="copySupportCode()">📋</button>
+
+    <div class="settings-block">
+      <div style="padding:16px">
+        <div class="card-label">История платежей</div>
+        <div id="payment-history-list" style="font-size:13px;color:var(--text3);padding:4px 0">История пуста</div>
       </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:6px">Сообщите этот код оператору поддержки</div>
     </div>
-    <a href="https://t.me/your_support" target="_blank" class="btn btn-outline" style="margin-bottom:14px;text-decoration:none">
-      🎧 Связаться с поддержкой
-    </a>
-    <div class="card-title">Поддержать проект</div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Помогите нам развиваться — любая сумма важна</div>
-    <button class="btn btn-green" onclick="donate()">❤️ Задонатить</button>
+
+    <div class="settings-block">
+      <div style="padding:16px">
+        <div class="card-label">Нужна помощь?</div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px">Ваш саппорт-код</div>
+        <div class="support-code-box">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="support-code-val" id="support-code">—</div>
+            <button class="data-item-action" onclick="copySupportCode()">Копировать</button>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:8px">Сообщите код оператору поддержки</div>
+        </div>
+        <a href="https://t.me/your_support" target="_blank"
+           style="text-decoration:none;display:flex;margin-top:10px">
+          <button class="btn btn-outline" style="width:100%">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Связаться с поддержкой
+          </button>
+        </a>
+      </div>
+    </div>
+
+    <div class="settings-block">
+      <div style="padding:16px">
+        <div class="card-label">Поддержать проект</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:12px">Помогите нам развиваться — любая сумма важна</div>
+        <button class="btn btn-green" onclick="donate()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          Задонатить
+        </button>
+      </div>
+    </div>
   </div>
+
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ TAB BAR -->
+<!-- ═══════════════════════════════════ TAB BAR ═════════════════ -->
 <nav class="tab-bar">
   <div class="tab-item active" id="tab-home" onclick="switchTab('home')">
-    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <div class="tab-icon-bg tab-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </div>
     <span class="tab-label">Home</span>
   </div>
   <div class="tab-item" id="tab-vpn" onclick="switchTab('vpn')">
-    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>
+    <div class="tab-icon-bg tab-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>
+    </div>
     <span class="tab-label">VPN</span>
   </div>
   <div class="tab-item" id="tab-referrals" onclick="switchTab('referrals')">
-    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+    <div class="tab-icon-bg tab-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </div>
     <span class="tab-label">Referrals</span>
   </div>
   <div class="tab-item" id="tab-profile" onclick="switchTab('profile')">
-    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <div class="tab-icon-bg tab-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
     <span class="tab-label">Profile</span>
   </div>
 </nav>
 
+<!-- ═══════════════════════════════════ SCRIPT ══════════════════ -->
 <script>
-/* ── Telegram WebApp init ─────────────────────────────────── */
 const tg = window.Telegram?.WebApp;
-if (tg) {
-  tg.ready();
-  tg.expand();
-  tg.setHeaderColor('#0f0f11');
-  tg.setBackgroundColor('#0f0f11');
-}
+if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor('#080810'); tg.setBackgroundColor('#080810'); }
 
 const user = tg?.initDataUnsafe?.user || {};
-const BOT_USERNAME = 'YourVPNBot'; // ← replace with real username
+const BOT_USERNAME = 'YourVPNBot';
 
-/* ── State ───────────────────────────────────────────────── */
 let state = {
   username: user.first_name || 'Пользователь',
   userId:   user.id || 0,
-  subEnd:   0,      // timestamp ms
+  subEnd:   0,
   balance:  0,
   refCount: 0,
   refEarned:0,
   uuid:     '',
-  tariff:   { id: 1, name: 'Личный — 1 год', price: 25, days: 365 },
   period:   'year',
   plan:     'personal',
-  refLink:  '',
-  config:   '',
+  tariff:   null,
 };
 
-/* ── Tariff data ─────────────────────────────────────────── */
 const TARIFFS = {
   personal: {
-    year:  { id:4, name:'Личный',  price:25, total:25, old:60, devices:2 },
-    month: { id:1, name:'Личный',  price:3,  total:3,  old:5,  devices:2 },
+    year:  { id:4, name:'Личный',      price:25, monthly:2.08, old_m:5,   devices:2  },
+    month: { id:1, name:'Личный',      price:3,  monthly:3,    old_m:5,   devices:2  },
   },
   family: {
-    year:  { id:5, name:'Семейный', price:40, total:40, old:84, devices:6 },
-    month: { id:5, name:'Семейный', price:6,  total:6,  old:10, devices:6 },
+    year:  { id:5, name:'Семейный',    price:40, monthly:3.33, old_m:10,  devices:6  },
+    month: { id:5, name:'Семейный',    price:6,  monthly:6,    old_m:10,  devices:6  },
   },
   max: {
-    year:  { id:6, name:'Максимальный', price:55, total:55, old:120, devices:10 },
-    month: { id:6, name:'Максимальный', price:9,  total:9,  old:15,  devices:10 },
+    year:  { id:6, name:'Максимальный',price:55, monthly:4.58, old_m:15,  devices:10 },
+    month: { id:6, name:'Максимальный',price:9,  monthly:9,    old_m:15,  devices:10 },
   },
   game: {
-    year:  { id:6, name:'Игровой', price:45, total:45, old:96, devices:4 },
-    month: { id:6, name:'Игровой', price:7,  total:7,  old:12, devices:4 },
+    year:  { id:6, name:'Игровой',     price:45, monthly:3.75, old_m:12,  devices:4  },
+    month: { id:6, name:'Игровой',     price:7,  monthly:7,    old_m:12,  devices:4  },
   },
 };
 
-/* ── Tab navigation ──────────────────────────────────────── */
+/* ── Navigation ──────────────────────────────── */
 function switchTab(tab) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + tab).classList.add('active');
   document.getElementById('tab-'  + tab).classList.add('active');
-  // Hide settings if switching away from profile
-  if (tab !== 'profile') {
-    document.getElementById('settings-section').style.display = 'none';
-  }
+  if (tab !== 'profile') document.getElementById('settings-section').style.display = 'none';
+  window.scrollTo(0, 0);
 }
 
-/* ── Init / load state ───────────────────────────────────── */
+/* ── Init ────────────────────────────────────── */
 function init() {
-  // Initial letter for avatar
   const letter = (state.username || 'U')[0].toUpperCase();
-  ['home-avatar','profile-avatar'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = letter;
-  });
-
-  const uname = '@' + (user.username || state.username);
-  document.getElementById('home-username').textContent = state.username;
+  document.getElementById('home-avatar').textContent   = letter;
+  document.getElementById('home-username').textContent  = state.username;
   document.getElementById('profile-name').textContent   = state.username;
-  document.getElementById('profile-handle').textContent = uname;
-  document.getElementById('d-tg').textContent            = uname;
+
+  const handle = '@' + (user.username || state.username.toLowerCase().replace(' ',''));
+  document.getElementById('profile-handle').textContent = handle;
+  document.getElementById('d-tg').textContent            = handle;
   document.getElementById('support-code').textContent   = state.userId || '—';
 
-  // Ref link
   const refCode = 'ref_' + state.userId;
   state.refLink = `https://t.me/${BOT_USERNAME}?start=${refCode}`;
   document.getElementById('ref-link-text').textContent = state.refLink;
 
-  // Registered date (use today as approximation)
   const since = new Date();
-  document.getElementById('profile-since').textContent = since.toLocaleDateString('ru-RU', {day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('profile-since').textContent =
+    since.toLocaleDateString('ru-RU', { day:'numeric', month:'short', year:'numeric' });
 
   updateTariffUI();
-  hideLoading();
+  updateSubStatus();
+  updateRefStats();
+
+  setTimeout(() => {
+    const el = document.getElementById('loading');
+    el.classList.add('hide');
+    setTimeout(() => el.style.display = 'none', 400);
+  }, 600);
 }
 
-function hideLoading() {
-  const el = document.getElementById('loading');
-  el.classList.add('hide');
-  setTimeout(() => el.style.display = 'none', 400);
-}
-
-/* ── Subscription status ─────────────────────────────────── */
+/* ── Sub status ──────────────────────────────── */
 function updateSubStatus() {
-  const now = Date.now();
+  const now    = Date.now();
   const active = state.subEnd > now;
-  const banner = document.getElementById('status-banner');
+  const hero   = document.getElementById('status-hero');
   const dot    = document.getElementById('status-dot');
-  const txt    = document.getElementById('status-text');
+  const label  = document.getElementById('status-label');
+  const title  = document.getElementById('status-title');
   const sub    = document.getElementById('status-sub');
-  const badge  = document.getElementById('sub-badge');
+  const chip   = document.getElementById('discount-chip');
 
   if (active) {
-    banner.className = 'status-banner protected';
-    dot.className    = 'status-dot green';
-    txt.textContent  = 'Вы защищены';
-    sub.textContent  = 'VPN активен · VLESS/Reality';
-    badge.style.display = 'none';
+    hero.className = 'status-hero protected';
+    dot.className  = 'status-dot green';
+    label.textContent = 'Защищён';
+    title.textContent = 'Вы защищены';
+    sub.textContent   = 'VPN активен · VLESS Reality';
+    chip.style.display = 'none';
     document.getElementById('trial-card').style.display = 'block';
     document.getElementById('active-sub-card').style.display = 'block';
     const dt = new Date(state.subEnd);
-    document.getElementById('sub-end-date').textContent = dt.toLocaleDateString('ru-RU', {day:'numeric',month:'long',year:'numeric'});
-    document.getElementById('home-sub-status').textContent = 'Активна до ' + dt.toLocaleDateString('ru-RU');
-    document.getElementById('profile-sub-badge').className = 'sub-active';
-    document.getElementById('profile-sub-badge').textContent = 'Активна';
+    document.getElementById('sub-end-date').textContent =
+      dt.toLocaleDateString('ru-RU', { day:'numeric', month:'long', year:'numeric' });
+    document.getElementById('profile-sub-badge').className = 'sub-badge-pill active';
+    document.getElementById('profile-sub-badge').innerHTML =
+      `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg> Активна`;
     document.getElementById('sub-status-row').innerHTML = `
-      <div><div class="tariff-row-label" style="color:var(--accent)">Подписка активна</div>
-      <div class="tariff-row-sub">До ${dt.toLocaleDateString('ru-RU')}</div></div>`;
+      <div class="data-item-icon" style="background:var(--green-dim)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+      </div>
+      <div class="data-item-body">
+        <div class="data-item-val green">Подписка активна</div>
+        <div class="data-item-label" style="margin-top:2px">До ${dt.toLocaleDateString('ru-RU')}</div>
+      </div>`;
   } else {
-    banner.className = 'status-banner unprotected';
-    dot.className    = 'status-dot red';
-    txt.textContent  = 'Вы не защищены';
-    sub.textContent  = 'Подключите VPN для защиты';
-    badge.style.display = 'block';
-    document.getElementById('trial-card').style.display = 'none';
-    document.getElementById('active-sub-card').style.display = 'none';
+    hero.className = 'status-hero unprotected';
+    dot.className  = 'status-dot red';
+    label.textContent = 'Нет защиты';
+    title.textContent = 'Вы не защищены';
+    sub.textContent   = 'Обход РКН · 50+ локаций · VLESS Reality';
+    chip.style.display = 'block';
+    document.getElementById('trial-card').style.display       = 'none';
+    document.getElementById('active-sub-card').style.display  = 'none';
   }
 }
 
-/* ── Tariff UI ───────────────────────────────────────────── */
+/* ── Tariff UI ───────────────────────────────── */
 function selectPeriod(p) {
   state.period = p;
-  document.getElementById('toggle-year').classList.toggle('active', p === 'year');
-  document.getElementById('toggle-month').classList.toggle('active', p === 'month');
+  document.getElementById('period-year').classList.toggle('active',  p === 'year');
+  document.getElementById('period-month').classList.toggle('active', p === 'month');
   updateTariffUI();
 }
 
 function selectPlan(el, plan) {
   state.plan = plan;
-  document.querySelectorAll('.plan-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.plan-pill').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
   updateTariffUI();
 }
@@ -865,16 +1392,30 @@ function updateTariffUI() {
   const t = TARIFFS[state.plan]?.[state.period] || TARIFFS.personal.year;
   state.tariff = t;
   document.getElementById('t-name').textContent    = t.name;
-  document.getElementById('t-price').textContent   = '$' + (t.price / (state.period === 'year' ? 12 : 1)).toFixed(2);
-  document.getElementById('t-old').textContent     = '$' + (t.old / (state.period === 'year' ? 12 : 1)).toFixed(2) + '/мес';
+  document.getElementById('t-price').textContent   = '$' + t.monthly.toFixed(2);
+  document.getElementById('t-period').textContent  = state.period === 'year' ? '/мес · годовая' : '/месяц';
+  document.getElementById('t-old').textContent     = '$' + t.old_m.toFixed(2) + '/мес';
   document.getElementById('t-devices').textContent = t.devices;
   const label = state.period === 'year'
-    ? `$${t.total} за год`
-    : `$${t.total} за месяц`;
+    ? `$${t.price} за год`
+    : `$${t.price} за месяц`;
   document.getElementById('pay-label').textContent = label;
 }
 
-/* ── Actions ─────────────────────────────────────────────── */
+/* ── Ref stats ───────────────────────────────── */
+function updateRefStats() {
+  document.getElementById('ref-count').textContent  = state.refCount;
+  document.getElementById('ref-weeks').textContent  = Math.floor(state.refCount / 4);
+  document.getElementById('ref-earned').textContent = '$' + state.refEarned.toFixed(2);
+  document.getElementById('balance-display').textContent = '$' + state.balance.toFixed(2);
+  document.getElementById('d-balance').textContent       = '$' + state.balance.toFixed(2);
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById('dot-' + i).classList.toggle('done', state.refCount >= i);
+    if (i < 4) document.getElementById('pline-' + i).classList.toggle('done', state.refCount >= i);
+  }
+}
+
+/* ── Actions ─────────────────────────────────── */
 function getConfig() {
   sendData({ action: 'get_config' });
   showToast('📨 Конфиг отправляется в чат...');
@@ -887,29 +1428,14 @@ function getStats() {
 
 function startPayment() {
   const t = state.tariff;
+  if (!t) return;
   sendData({ action: 'buy', tariff_id: t.id });
   showToast('💳 Создаём счёт...');
 }
 
-function shareRef() {
-  if (tg?.shareUrl) {
-    tg.shareUrl(state.refLink, 'Присоединяйся к VPN-сервису! 🚀');
-  } else {
-    copyRef();
-  }
-}
-
-function copyRef() {
-  copyToClipboard(state.refLink);
-  showToast('🔗 Реферальная ссылка скопирована!');
-}
-
 function copyConfig() {
   const txt = document.getElementById('config-text').textContent;
-  if (txt && txt.startsWith('vless://')) {
-    copyToClipboard(txt);
-    showToast('📋 Конфиг скопирован!');
-  }
+  if (txt.startsWith('vless://')) { copyText(txt); showToast('📋 Конфиг скопирован!'); }
 }
 
 function shareConfig() {
@@ -917,26 +1443,25 @@ function shareConfig() {
   if (tg?.shareUrl && txt.startsWith('vless://')) tg.shareUrl(txt);
 }
 
-function copyUUID() {
-  const val = document.getElementById('d-uuid').textContent;
-  copyToClipboard(val);
-  showToast('📋 ID скопирован!');
+function shareRef() {
+  if (tg?.shareUrl) tg.shareUrl(state.refLink, 'Присоединяйся к VPN-сервису! 🚀');
+  else copyRef();
 }
 
-function copySupportCode() {
-  copyToClipboard(document.getElementById('support-code').textContent);
-  showToast('📋 Код скопирован!');
-}
+function copyRef() { copyText(state.refLink); showToast('🔗 Ссылка скопирована!'); }
+function copyUUID() { copyText(document.getElementById('d-uuid').textContent); showToast('📋 ID скопирован!'); }
+function copySupportCode() { copyText(document.getElementById('support-code').textContent); showToast('📋 Код скопирован!'); }
 
 function showSettings() {
   switchTab('profile');
-  document.getElementById('settings-section').style.display = 'block';
-  setTimeout(() => document.getElementById('settings-section').scrollIntoView({ behavior: 'smooth' }), 100);
+  const s = document.getElementById('settings-section');
+  s.style.display = 'block';
+  setTimeout(() => s.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 }
 
-function showWithdraw() {
-  const form = document.getElementById('withdraw-form');
-  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+function toggleWithdraw() {
+  const f = document.getElementById('withdraw-form');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
 }
 
 function submitWithdraw() {
@@ -951,25 +1476,22 @@ function submitWithdraw() {
 
 function linkEmail() {
   const email = document.getElementById('email-input').value.trim();
-  if (!email || !email.includes('@')) { showToast('❌ Введите корректный email'); return; }
+  if (!email || !email.includes('@')) { showToast('❌ Некорректный email'); return; }
   sendData({ action: 'link_email', email });
+  const el = document.getElementById('d-email-status');
+  el.textContent = email; el.classList.remove('red');
   showToast('✅ Email привязан!');
-  document.getElementById('d-email-status').textContent = email;
-  document.getElementById('d-email-status').classList.remove('red');
 }
 
-function donate() {
-  sendData({ action: 'donate' });
-  showToast('❤️ Спасибо за поддержку!');
-}
+function donate() { sendData({ action: 'donate' }); showToast('❤️ Спасибо!'); }
 
-/* ── Helpers ─────────────────────────────────────────────── */
+/* ── Helpers ─────────────────────────────────── */
 function sendData(payload) {
   if (tg?.sendData) tg.sendData(JSON.stringify(payload));
-  else console.log('[WebApp] sendData:', payload);
+  else console.log('[sendData]', payload);
 }
 
-function copyToClipboard(text) {
+function copyText(text) {
   if (navigator.clipboard) navigator.clipboard.writeText(text);
   else {
     const el = document.createElement('textarea');
@@ -979,37 +1501,16 @@ function copyToClipboard(text) {
   }
 }
 
-function showToast(msg, duration = 2500) {
+let toastTimer;
+function showToast(msg) {
   const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), duration);
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
 }
 
-/* ── Update ref stats ────────────────────────────────────── */
-function updateRefStats() {
-  document.getElementById('ref-count').textContent  = state.refCount;
-  document.getElementById('ref-weeks').textContent  = Math.floor(state.refCount / 4);
-  document.getElementById('ref-earned').textContent = '$' + state.refEarned.toFixed(2);
-  document.getElementById('balance-display').textContent = '$' + state.balance.toFixed(2);
-  document.getElementById('d-balance').textContent = '$' + state.balance.toFixed(2);
-  // Progress dots
-  for (let i = 1; i <= 4; i++) {
-    document.getElementById('dot-' + i).classList.toggle('done', state.refCount >= i);
-  }
-}
-
-/* ── Boot ────────────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', () => {
-  init();
-  updateSubStatus();
-  updateRefStats();
-
-  if (state.uuid) {
-    document.getElementById('d-uuid').textContent      = state.uuid.substring(0,8) + '...' + state.uuid.slice(-4);
-    document.getElementById('profile-uuid').textContent = state.uuid.substring(0,8) + '...' + state.uuid.slice(-4);
-  }
-});
+/* ── Boot ────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
