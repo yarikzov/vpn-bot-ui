@@ -8,18 +8,18 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"/>
 <style>
 :root {
-  --bg:          #080810;  --bg1: #0d0d1a;  --bg2: #111120;  --bg3: #16162a;  --bg4: #1c1c35;
-  --border:      rgba(120,120,255,0.12);  --border2: rgba(120,120,255,0.22);
-  --cyan:        #00f5ff;  --cyan-dim: rgba(0,245,255,0.15);  --cyan-glow: rgba(0,245,255,0.35);
-  --violet:      #8b5cf6;  --violet-dim: rgba(139,92,246,0.15);  --violet-glow: rgba(139,92,246,0.4);
-  --pink:        #f472b6;  --pink-dim: rgba(244,114,182,0.12);
-  --green:       #4ade80;  --green-dim: rgba(74,222,128,0.12);  --green-glow: rgba(74,222,128,0.3);
-  --amber:       #fbbf24;  --amber-dim: rgba(251,191,36,0.12);
-  --red:         #f87171;  --red-dim: rgba(248,113,113,0.12);
-  --text:        #e8e8ff;  --text2: #a0a0c8;  --text3: #5a5a88;
-  --radius-sm: 10px;  --radius: 16px;  --radius-lg: 22px;  --radius-xl: 28px;
-  --tab-h: 80px;  --safe-bot: env(safe-area-inset-bottom, 0px);
-  --font: 'Plus Jakarta Sans', sans-serif;
+  --bg:#080810; --bg1:#0d0d1a; --bg2:#111120; --bg3:#16162a; --bg4:#1c1c35;
+  --border:rgba(120,120,255,0.12); --border2:rgba(120,120,255,0.22);
+  --cyan:#00f5ff; --cyan-dim:rgba(0,245,255,0.15); --cyan-glow:rgba(0,245,255,0.35);
+  --violet:#8b5cf6; --violet-dim:rgba(139,92,246,0.15); --violet-glow:rgba(139,92,246,0.4);
+  --pink:#f472b6; --pink-dim:rgba(244,114,182,0.12);
+  --green:#4ade80; --green-dim:rgba(74,222,128,0.12); --green-glow:rgba(74,222,128,0.3);
+  --amber:#fbbf24; --amber-dim:rgba(251,191,36,0.12);
+  --red:#f87171; --red-dim:rgba(248,113,113,0.12);
+  --text:#e8e8ff; --text2:#a0a0c8; --text3:#5a5a88;
+  --radius-sm:10px; --radius:16px; --radius-lg:22px; --radius-xl:28px;
+  --tab-h:80px; --safe-bot:env(safe-area-inset-bottom,0px);
+  --font:'Plus Jakarta Sans',sans-serif;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{height:100%;overflow-x:hidden}
@@ -27,16 +27,24 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");opacity:.4}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+/* Pages */
 .page{display:none;flex-direction:column;padding-bottom:calc(var(--tab-h) + var(--safe-bot) + 16px);position:relative;z-index:1}
 .page.active{display:flex;animation:fadeUp .25s ease}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* Glow orbs */
 .glow-orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(80px)}
 .glow-orb-1{width:300px;height:300px;background:rgba(139,92,246,0.08);top:-80px;right:-60px}
 .glow-orb-2{width:250px;height:250px;background:rgba(0,245,255,0.05);top:300px;left:-80px}
 .glow-orb-3{width:200px;height:200px;background:rgba(244,114,182,0.04);bottom:200px;right:-40px}
+
+/* Cards */
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin:10px 14px 0;position:relative;overflow:hidden}
 .card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.025) 0%,transparent 60%);pointer-events:none}
 .card-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:12px}
+
+/* Buttons */
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:var(--radius);cursor:pointer;font-family:var(--font);font-weight:700;font-size:15px;transition:filter .15s,transform .1s,box-shadow .2s;position:relative;overflow:hidden}
 .btn::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.06) 0%,transparent 100%);pointer-events:none}
 .btn:active{transform:scale(.96);filter:brightness(.88)}
@@ -46,11 +54,15 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .btn-outline{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:13px 16px;border-radius:var(--radius-sm)}
 .btn-outline:hover{border-color:var(--border2)}
 .btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text2);padding:10px 16px;border-radius:10px;font-size:13px}
+
+/* Top bar */
 .top-bar{display:flex;align-items:center;justify-content:space-between;padding:18px 16px 0;position:relative;z-index:2}
 .user-pill{display:flex;align-items:center;gap:11px;background:var(--bg2);border:1px solid var(--border);border-radius:50px;padding:6px 14px 6px 6px}
 .avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;box-shadow:0 0 14px var(--violet-glow);flex-shrink:0}
 .user-name-sm{font-size:14px;font-weight:600}
 .help-btn{width:40px;height:40px;border-radius:12px;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);transition:color .2s,border-color .2s;flex-shrink:0}
+
+/* Status hero */
 .status-hero{margin:14px 14px 0;border-radius:var(--radius-xl);padding:22px 20px;position:relative;overflow:hidden;border:1px solid var(--border);min-height:120px}
 .status-hero.protected{background:linear-gradient(145deg,#0a1f12,#071a17);border-color:rgba(74,222,128,0.2)}
 .status-hero.unprotected{background:linear-gradient(145deg,#1a0a0a,#170a0a);border-color:rgba(248,113,113,0.2)}
@@ -67,6 +79,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .status-title{font-size:22px;font-weight:800;margin-bottom:4px;letter-spacing:-.02em}
 .status-sub{font-size:12px;color:var(--text2);line-height:1.5}
 .discount-chip{position:absolute;top:16px;right:16px;background:var(--red);color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:8px}
+
+/* Feature chips */
 .chips-row{display:flex;gap:8px;overflow-x:auto;padding:12px 14px 0;scrollbar-width:none}
 .chips-row::-webkit-scrollbar{display:none}
 .chip{display:flex;align-items:center;gap:6px;flex-shrink:0;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:7px 12px;font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap}
@@ -74,6 +88,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .chip.cyan{border-color:rgba(0,245,255,0.2);color:var(--cyan);background:var(--cyan-dim)}
 .chip.violet{border-color:rgba(139,92,246,0.25);color:#b48aff;background:var(--violet-dim)}
 .chip.green{border-color:rgba(74,222,128,0.2);color:var(--green);background:var(--green-dim)}
+
+/* Action rows */
 .action-row{display:flex;flex-direction:column;gap:2px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin:10px 14px 0}
 .action-item{display:flex;align-items:center;gap:14px;padding:15px 16px;cursor:pointer;transition:background .15s;position:relative}
 .action-item:not(:last-child)::after{content:'';position:absolute;bottom:0;left:54px;right:0;height:1px;background:var(--border)}
@@ -84,36 +100,38 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .action-icon svg{width:18px;height:18px}
 .action-text{flex:1}.action-title{font-size:14px;font-weight:600}.action-sub{font-size:12px;color:var(--text3);margin-top:1px}.action-arrow{color:var(--text3);font-size:16px}
 .action-badge{background:var(--green);color:#000;font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px}
-.period-toggle{display:flex;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:4px;margin:16px 14px 0}
-.period-btn{flex:1;padding:10px;border-radius:11px;background:transparent;border:none;color:var(--text3);font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
-.period-btn.active{background:var(--bg4);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.4)}
-.plan-scroll{display:flex;gap:8px;overflow-x:auto;padding:12px 14px 0;scrollbar-width:none}
-.plan-scroll::-webkit-scrollbar{display:none}
-.plan-pill{flex-shrink:0;padding:8px 16px;border-radius:20px;background:var(--bg2);border:1px solid var(--border);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
-.plan-pill.active{background:var(--violet-dim);border-color:rgba(139,92,246,0.4);color:#c4b5fd}
-.tariff-card{margin:12px 14px 0;background:var(--bg2);border:1.5px solid rgba(139,92,246,0.3);border-radius:var(--radius-xl);overflow:hidden;box-shadow:0 0 40px rgba(139,92,246,0.08)}
-.tariff-header{padding:18px 18px 16px;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--border);background:linear-gradient(135deg,rgba(139,92,246,0.06),transparent)}
-.tariff-plan-name{font-size:18px;font-weight:800;letter-spacing:-.02em}.tariff-plan-sub{font-size:12px;color:var(--text3);margin-top:3px}
-.tariff-price-wrap{text-align:right}.tariff-amount{font-size:26px;font-weight:800;color:var(--text);letter-spacing:-.03em}.tariff-period{font-size:11px;color:var(--text3)}.tariff-old{font-size:11px;color:var(--text3);text-decoration:line-through}
-.tariff-feature{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--border)}
-.tariff-feature:last-child{border-bottom:none}
-.tf-left{display:flex;align-items:center;gap:12px}
-.tf-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.tf-icon.violet{background:var(--violet-dim)}.tf-icon.cyan{background:var(--cyan-dim)}.tf-icon.green{background:var(--green-dim)}.tf-icon.amber{background:var(--amber-dim)}.tf-icon.pink{background:var(--pink-dim)}
-.tf-icon svg{width:16px;height:16px}
-.tf-title{font-size:13px;font-weight:600}.tf-sub{font-size:11px;color:var(--text3);margin-top:1px}
-.tf-val{font-size:13px;font-weight:700;color:var(--violet);font-family:'JetBrains Mono',monospace}
-.tf-val.cyan{color:var(--cyan)}.tf-val.green{color:var(--green)}
+
+/* Tariffs */
+.tariffs-list-dynamic{display:flex;flex-direction:column;gap:8px;margin:10px 14px 0}
+.tariff-dynamic-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .2s,background .2s}
+.tariff-dynamic-item:hover{border-color:var(--border2);background:var(--bg3)}
+.tariff-dynamic-item.selected{border-color:rgba(139,92,246,0.5);background:var(--violet-dim)}
+.tariff-dynamic-left .name{font-size:15px;font-weight:700}
+.tariff-dynamic-left .days{font-size:12px;color:var(--text3);margin-top:2px}
+.tariff-dynamic-right .price{font-size:20px;font-weight:800;color:var(--violet);font-family:'JetBrains Mono',monospace}
+.tariff-dynamic-right .cur{font-size:11px;color:var(--text3)}
+
+/* Currency */
+.currency-row{display:flex;gap:8px;margin:12px 14px 0}
+.currency-pill{flex:1;padding:9px;text-align:center;border-radius:12px;background:var(--bg2);border:1px solid var(--border);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;color:var(--text2)}
+.currency-pill.active{border-color:rgba(139,92,246,0.5);color:#c4b5fd;background:var(--violet-dim)}
+
+/* Pay sticky */
 .pay-sticky{position:sticky;bottom:calc(var(--tab-h) + var(--safe-bot));padding:12px 14px;background:linear-gradient(to top,var(--bg) 50%,transparent);z-index:10}
 .pay-note{font-size:11px;color:var(--text3);text-align:center;margin-top:8px}
+
+/* Active sub */
 .active-sub-card{margin:12px 14px 0;background:linear-gradient(135deg,#0a1f12,#071a17);border:1px solid rgba(74,222,128,0.25);border-radius:var(--radius-xl);padding:20px;box-shadow:0 0 40px rgba(74,222,128,0.05)}
-.active-sub-title{font-size:13px;font-weight:700;color:var(--green);display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.active-sub-date{font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:16px}
+.days-badge{display:inline-flex;align-items:center;gap:6px;background:var(--green-dim);border:1px solid rgba(74,222,128,0.3);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--green)}
+
+/* Stats */
 .stat-row{display:flex;gap:8px;padding:14px 14px 0}
 .stat-box{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 10px;text-align:center}
 .stat-val{font-size:22px;font-weight:800;letter-spacing:-.03em}
 .stat-val.cyan{color:var(--cyan)}.stat-val.violet{color:#b48aff}.stat-val.amber{color:var(--amber)}
 .stat-label{font-size:11px;color:var(--text3);margin-top:4px;font-weight:500}
+
+/* Referral */
 .ref-link-box{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--cyan);word-break:break-all;line-height:1.5}
 .progress-track{display:flex;align-items:center}
 .progress-dot-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
@@ -132,6 +150,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .balance-label{font-size:12px;color:var(--text3);font-weight:600;margin-bottom:4px}
 .balance-val{font-size:26px;font-weight:800;color:var(--green);letter-spacing:-.03em}
 .withdraw-form{display:none;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin:10px 14px 0}
+
+/* Profile */
 .profile-hero{margin:14px 14px 0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-xl);padding:22px 20px}
 .sub-badge-pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;margin-bottom:14px}
 .sub-badge-pill.active{background:var(--green-dim);color:var(--green);border:1px solid rgba(74,222,128,.25)}
@@ -141,6 +161,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .profile-meta{display:flex;gap:24px;margin-top:16px}
 .pm-item label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;font-weight:700}
 .pm-item p{font-size:11px;font-weight:600;margin-top:2px;font-family:'JetBrains Mono',monospace}
+
+/* Data lists */
 .data-list{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin:10px 14px 0}
 .data-item{display:flex;align-items:center;gap:14px;padding:14px 16px;position:relative}
 .data-item:not(:last-child)::after{content:'';position:absolute;bottom:0;left:54px;right:0;height:1px;background:var(--border)}
@@ -153,13 +175,14 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .data-item-val.red{color:var(--red)}.data-item-val.green{color:var(--green)}
 .data-item-action{background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);white-space:nowrap;flex-shrink:0;transition:color .15s}
 .data-item-action:hover{color:var(--text)}
+
+/* Inputs */
 .input-row{display:flex;gap:8px;align-items:center}
 .input-field{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px 13px;font-size:13px;font-family:var(--font);outline:none;transition:border-color .2s}
 .input-field:focus{border-color:rgba(139,92,246,0.5)}
 .input-field::placeholder{color:var(--text3)}
-.link-btn{width:38px;height:38px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);flex-shrink:0;transition:color .2s}
-.link-btn:hover{color:var(--violet)}
-.link-btn svg{width:16px;height:16px}
+
+/* Settings */
 .settings-section{display:none;margin:10px 14px 0}
 .settings-block{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:10px}
 .settings-row{display:flex;align-items:center;gap:14px;padding:14px 16px;position:relative}
@@ -168,12 +191,16 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .settings-row-sub{font-size:12px;color:var(--text3);margin-top:2px}
 .support-code-box{background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;margin-top:10px}
 .support-code-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:var(--cyan);letter-spacing:.06em}
+
+/* Payment history */
 .pay-history-item{padding:10px 0;border-bottom:1px solid var(--border);font-size:12px}
 .pay-history-item:last-child{border-bottom:none}
 .pay-history-name{font-weight:600;color:var(--text);margin-bottom:2px}
 .pay-history-meta{color:var(--text3)}
 .pay-history-amount{font-weight:700;font-family:'JetBrains Mono',monospace}
 .pay-history-amount.paid{color:var(--green)}.pay-history-amount.pending{color:var(--amber)}
+
+/* Tab bar */
 .tab-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(13,13,26,0.92);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;padding:8px 8px calc(var(--safe-bot) + 8px);height:var(--tab-h);align-items:flex-start;z-index:100}
 .tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:7px 4px;border-radius:12px;transition:background .15s}
 .tab-item:hover{background:var(--bg3)}
@@ -181,42 +208,34 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .tab-icon-bg{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;transition:background .2s,box-shadow .2s;background:transparent}
 .tab-icon-wrap{color:var(--text3);transition:color .2s}.tab-icon-wrap svg{width:18px;height:18px}
 .tab-label{font-size:10px;font-weight:600;color:var(--text3);transition:color .2s;letter-spacing:.02em}
+
+/* Loading screen */
 #loading{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:20px;transition:opacity .35s}
 #loading.hide{opacity:0;pointer-events:none}
 .loader-logo{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--violet),var(--cyan));display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px var(--violet-glow),0 0 60px var(--cyan-glow);animation:logoPulse 2s ease infinite}
 .loader-logo svg{width:34px;height:34px;color:#fff}
 @keyframes logoPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 .loader-text{font-size:13px;color:var(--text3);font-weight:500}
+
+/* Toast */
 #toast{position:fixed;top:24px;left:50%;transform:translateX(-50%) translateY(-70px);background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:10px 18px;border-radius:12px;font-size:13px;font-weight:500;z-index:9998;transition:transform .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap}
 #toast.show{transform:translateX(-50%) translateY(0)}
-.save-badge{background:linear-gradient(135deg,var(--green),#16a34a);color:#fff;font-size:11px;font-weight:800;padding:7px 14px;border-radius:10px;text-align:center;margin:10px 14px 0;letter-spacing:.02em;box-shadow:0 4px 16px rgba(74,222,128,0.2)}
-.page-title{padding:20px 16px 0;text-align:center}
-.page-title h1{font-size:22px;font-weight:800;letter-spacing:-.03em}
-.page-title p{font-size:13px;color:var(--text2);margin-top:4px}
+
+/* Audit card */
 .audit-card{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#0f0f22,#0a0a1a);border:1px solid rgba(139,92,246,0.15);border-radius:var(--radius-lg);padding:16px;margin:10px 14px 0}
 .audit-icon-wrap{width:40px;height:40px;border-radius:11px;background:var(--violet-dim);border:1px solid rgba(139,92,246,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .audit-icon-wrap svg{width:20px;height:20px}
 .audit-body{flex:1}.audit-title{font-size:13px;font-weight:700}.audit-sub{font-size:11px;color:var(--text3);margin-top:2px}
 .audit-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);white-space:nowrap;flex-shrink:0}
-.tariffs-list-dynamic{display:flex;flex-direction:column;gap:8px;margin:10px 14px 0}
-.tariff-dynamic-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .2s,background .2s}
-.tariff-dynamic-item:hover{border-color:var(--border2);background:var(--bg3)}
-.tariff-dynamic-item.selected{border-color:rgba(139,92,246,0.5);background:var(--violet-dim)}
-.tariff-dynamic-left .name{font-size:15px;font-weight:700}
-.tariff-dynamic-left .days{font-size:12px;color:var(--text3);margin-top:2px}
-.tariff-dynamic-right .price{font-size:20px;font-weight:800;color:var(--violet);font-family:'JetBrains Mono',monospace}
-.tariff-dynamic-right .cur{font-size:11px;color:var(--text3)}
-.currency-row{display:flex;gap:8px;margin:12px 14px 0}
-.currency-pill{flex:1;padding:9px;text-align:center;border-radius:12px;background:var(--bg2);border:1px solid var(--border);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;color:var(--text2)}
-.currency-pill.active{border-color:rgba(139,92,246,0.5);color:#c4b5fd;background:var(--violet-dim)}
-.qr-wrap{width:140px;height:140px;background:#fff;border-radius:12px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;color:#000;font-size:11px;text-align:center;font-family:var(--font);font-weight:600}
-.config-box{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--cyan);word-break:break-all;line-height:1.5;margin-bottom:10px}
-.copy-row{display:flex;gap:8px}
+
+/* Misc */
+.page-title{padding:20px 16px 0;text-align:center}
+.page-title h1{font-size:22px;font-weight:800;letter-spacing:-.03em}
+.page-title p{font-size:13px;color:var(--text2);margin-top:4px}
 .traffic-bar-wrap{margin:10px 0}
 .traffic-bar-label{display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-bottom:6px}
 .traffic-bar{height:6px;background:var(--bg3);border-radius:4px;overflow:hidden}
 .traffic-bar-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--violet));border-radius:4px;transition:width .5s ease}
-.days-badge{display:inline-flex;align-items:center;gap:6px;background:var(--green-dim);border:1px solid rgba(74,222,128,0.3);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--green)}
 </style>
 </head>
 <body>
@@ -277,8 +296,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     <button class="audit-btn" onclick="showToast('🔒 Протокол: VLESS+XTLS-Reality')">Изучить</button>
   </div>
 
-  <!-- Active sub card (shown when sub active) -->
-  <div class="card" id="home-active-card" style="display:none;border-color:rgba(74,222,128,0.2)">
+  <!-- Active sub card (hidden when no sub) -->
+  <div class="active-sub-card" id="home-active-card" style="display:none">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
       <div style="display:flex;align-items:center;gap:8px">
         <div style="width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green-glow);animation:pulse-green 2s infinite"></div>
@@ -335,12 +354,10 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     <p>VLESS · Reality · Без логов · 50+ серверов</p>
   </div>
 
-  <!-- Dynamic tariff list from server -->
   <div class="tariffs-list-dynamic" id="tariffs-list">
     <div style="text-align:center;padding:30px;color:var(--text3)">Загрузка тарифов...</div>
   </div>
 
-  <!-- Currency selection -->
   <div class="currency-row" id="currency-row" style="display:none">
     <div class="currency-pill active" id="cur-USDT" onclick="selectCurrency('USDT')">💵 USDT</div>
     <div class="currency-pill" id="cur-TON"  onclick="selectCurrency('TON')">💎 TON</div>
@@ -452,7 +469,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     <div class="data-item">
       <div class="data-item-icon violet"><svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
       <div class="data-item-body"><div class="data-item-label">ID Аккаунта</div><div class="data-item-val" id="d-uuid">—</div></div>
-      <button class="data-item-action" onclick="copyText(state.userId+'');showToast('📋 ID скопирован!')">Копировать</button>
+      <button class="data-item-action" onclick="copyText(String(state.userId));showToast('📋 ID скопирован!')">Копировать</button>
     </div>
     <div class="data-item">
       <div class="data-item-icon cyan"><svg viewBox="0 0 24 24" fill="none" stroke="#00f5ff" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
@@ -492,7 +509,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
         <div class="support-code-box">
           <div style="display:flex;justify-content:space-between;align-items:center">
             <div class="support-code-val" id="support-code">—</div>
-            <button class="data-item-action" onclick="copyText(state.userId+'');showToast('📋 Код скопирован!')">Копировать</button>
+            <button class="data-item-action" onclick="copyText(String(state.userId));showToast('📋 Код скопирован!')">Копировать</button>
           </div>
           <div style="font-size:11px;color:var(--text3);margin-top:8px">Сообщите код оператору поддержки</div>
         </div>
@@ -533,54 +550,74 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 </nav>
 
 <script>
-/* ═══════════ INIT ═══════════ */
+/* ═══════════════════════════════════════════════════════════════
+   INIT — Telegram WebApp
+═══════════════════════════════════════════════════════════════ */
 const tg = window.Telegram?.WebApp;
-if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor?.('#080810'); tg.setBackgroundColor?.('#080810'); }
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.setHeaderColor?.('#080810');
+  tg.setBackgroundColor?.('#080810');
+}
 
 const tgUser = tg?.initDataUnsafe?.user || {};
-const BOT_USERNAME = 'MrdotaVPNrobot'; // ← замените на ваш username
 
-// Base URL for API calls (same origin when served from Flask)
+// ← Change to your bot's username
+const BOT_USERNAME = 'MrdotaVPNrobot';
+
+// API base (same origin as Flask server)
 const API_BASE = window.location.origin;
 
+/* ═══════════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════════ */
 let state = {
-  userId:     tgUser.id || 0,
-  username:   tgUser.first_name || 'Пользователь',
-  subEnd:     0,
-  subActive:  false,
-  daysLeft:   0,
-  balance:    0,
-  refCount:   0,
-  refEarned:  0,
-  refLink:    '',
-  trafficUp:  0,
-  trafficDown:0,
-  createdAt:  0,
-  uuid:       '',
-  selectedTariffId: null,
+  userId:              tgUser.id   || 0,
+  username:            tgUser.first_name || 'Пользователь',
+  tgUsername:          tgUser.username || '',
+  subEnd:              0,
+  subActive:           false,
+  daysLeft:            0,
+  balance:             0,
+  refCount:            0,
+  refEarned:           0,
+  refLink:             '',
+  trafficUp:           0,
+  trafficDown:         0,
+  createdAt:           0,
+  uuid:                '',
+  selectedTariffId:    null,
   selectedTariffPrice: 0,
-  selectedTariffName: '',
-  currency:   'USDT',
-  tariffs:    [],
+  selectedTariffName:  '',
+  currency:            'USDT',
+  tariffs:             [],
 };
 
-/* ═══════════ NAVIGATION ═══════════ */
+/* ═══════════════════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════════════════ */
 function switchTab(tab) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + tab).classList.add('active');
-  document.getElementById('tab-' + tab).classList.add('active');
-  if (tab !== 'profile') document.getElementById('settings-section').style.display = 'none';
+  document.getElementById('tab-'  + tab).classList.add('active');
+  if (tab !== 'profile') {
+    document.getElementById('settings-section').style.display = 'none';
+  }
   window.scrollTo(0, 0);
 }
 
-/* ═══════════ LOAD DATA FROM SERVER ═══════════ */
+/* ═══════════════════════════════════════════════════════════════
+   DATA LOADING
+═══════════════════════════════════════════════════════════════ */
 async function loadProfile() {
   if (!state.userId) return;
   try {
     const r = await fetch(`${API_BASE}/api/profile?user_id=${state.userId}`);
     if (!r.ok) return;
     const d = await r.json();
+
     state.subEnd     = d.sub_end     || 0;
     state.subActive  = d.sub_active  || false;
     state.daysLeft   = d.days_left   || 0;
@@ -591,6 +628,7 @@ async function loadProfile() {
     state.trafficDown= d.traffic_down|| 0;
     state.createdAt  = d.created_at  || 0;
     state.uuid       = d.uuid        || '';
+
     renderProfile(d);
   } catch(e) {
     console.error('loadProfile error', e);
@@ -608,54 +646,59 @@ async function loadTariffs() {
   }
 }
 
-/* ═══════════ RENDER ═══════════ */
+/* ═══════════════════════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════════════════════════ */
 function renderProfile(d) {
-  // Home top bar
+  // Top bar avatar + name
   const letter = (state.username || 'U')[0].toUpperCase();
-  document.getElementById('home-avatar').textContent   = letter;
-  document.getElementById('home-username').textContent  = state.username;
+  document.getElementById('home-avatar').textContent  = letter;
+  document.getElementById('home-username').textContent = state.username;
 
-  // Home sub status
+  // Home status hero
   updateHomeStatus();
 
-  // Referrals
-  document.getElementById('ref-count').textContent  = state.refCount;
-  document.getElementById('ref-weeks').textContent  = Math.floor(state.refCount / 4);
-  document.getElementById('ref-earned').textContent = '$' + state.refEarned.toFixed(2);
+  // Referrals page
+  document.getElementById('ref-count').textContent   = state.refCount;
+  document.getElementById('ref-weeks').textContent   = Math.floor(state.refCount / 4);
+  document.getElementById('ref-earned').textContent  = '$' + state.refEarned.toFixed(2);
   document.getElementById('balance-display').textContent = '$' + state.balance.toFixed(2);
-  for (let i=1;i<=4;i++) {
-    document.getElementById('dot-'+i).classList.toggle('done', state.refCount >= i);
-    if (i<4) document.getElementById('pline-'+i).classList.toggle('done', state.refCount >= i);
+
+  // Progress dots
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById('dot-' + i).classList.toggle('done', state.refCount >= i);
+    if (i < 4) {
+      document.getElementById('pline-' + i).classList.toggle('done', state.refCount >= i);
+    }
   }
 
-  // Ref link
+  // Referral link
   const refCode = 'ref_' + state.userId;
   state.refLink = `https://t.me/${BOT_USERNAME}?start=${refCode}`;
   document.getElementById('ref-link-text').textContent = state.refLink;
 
   // Profile page
-  document.getElementById('profile-name').textContent   = state.username;
-  const handle = '@' + (tgUser.username || state.username.toLowerCase().replace(/\s/g,'_'));
+  document.getElementById('profile-name').textContent = state.username;
+  const handle = state.tgUsername ? '@' + state.tgUsername : state.username;
   document.getElementById('profile-handle').textContent = handle;
-  document.getElementById('d-tg').textContent            = handle;
-  document.getElementById('d-uuid').textContent          = state.userId + '';
-  document.getElementById('support-code').textContent   = state.userId + '';
-  document.getElementById('d-balance').textContent      = '$' + state.balance.toFixed(2);
-  document.getElementById('d-traffic').textContent      = `↑${state.trafficUp} GB · ↓${state.trafficDown} GB`;
+  document.getElementById('d-tg').textContent     = handle;
+  document.getElementById('d-uuid').textContent   = String(state.userId);
+  document.getElementById('support-code').textContent = String(state.userId);
+  document.getElementById('d-balance').textContent    = '$' + state.balance.toFixed(2);
+  document.getElementById('d-traffic').textContent    = `↑${state.trafficUp} GB · ↓${state.trafficDown} GB`;
 
-  const uuid6 = state.uuid ? state.uuid.substring(0,8) + '…' : 'Нет';
+  const uuid6 = state.uuid ? state.uuid.substring(0, 8) + '…' : 'Нет';
   document.getElementById('profile-uuid').textContent = uuid6;
 
   if (state.createdAt) {
     const dt = new Date(state.createdAt * 1000);
     document.getElementById('profile-since').textContent =
-      dt.toLocaleDateString('ru-RU', {day:'numeric', month:'short', year:'numeric'});
+      dt.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
-  // Sub status in profile
+  // Sub badge in profile
   if (state.subActive) {
-    const dt = new Date(state.subEnd);
-    const dateStr = dt.toLocaleDateString('ru-RU');
+    const dateStr = new Date(state.subEnd).toLocaleDateString('ru-RU');
     document.getElementById('profile-sub-badge').className = 'sub-badge-pill active';
     document.getElementById('profile-sub-badge').innerHTML =
       `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg> Активна`;
@@ -674,14 +717,14 @@ function renderProfile(d) {
 }
 
 function updateHomeStatus() {
-  const hero  = document.getElementById('status-hero');
-  const dot   = document.getElementById('status-dot');
-  const label = document.getElementById('status-label');
-  const title = document.getElementById('status-title');
-  const sub   = document.getElementById('status-sub');
-  const chip  = document.getElementById('discount-chip');
+  const hero      = document.getElementById('status-hero');
+  const dot       = document.getElementById('status-dot');
+  const label     = document.getElementById('status-label');
+  const title     = document.getElementById('status-title');
+  const sub       = document.getElementById('status-sub');
+  const chip      = document.getElementById('discount-chip');
   const activeCard = document.getElementById('home-active-card');
-  const ctaDiv     = document.getElementById('home-cta');
+  const ctaDiv    = document.getElementById('home-cta');
 
   if (state.subActive) {
     hero.className = 'status-hero protected';
@@ -692,9 +735,8 @@ function updateHomeStatus() {
     chip.style.display = 'none';
     activeCard.style.display = 'block';
     ctaDiv.style.display     = 'none';
-    const dt = new Date(state.subEnd);
     document.getElementById('home-sub-date').textContent =
-      dt.toLocaleDateString('ru-RU', {day:'numeric', month:'long', year:'numeric'});
+      new Date(state.subEnd).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
     document.getElementById('home-days-badge').textContent = state.daysLeft + ' дн.';
   } else {
     hero.className = 'status-hero unprotected';
@@ -753,22 +795,27 @@ function selectCurrency(cur) {
 
 function renderPayments(payments) {
   const el = document.getElementById('payment-history-list');
-  if (!payments.length) { el.innerHTML = '<div style="padding:4px 0;color:var(--text3)">История пуста</div>'; return; }
+  if (!payments.length) {
+    el.innerHTML = '<div style="padding:4px 0;color:var(--text3)">История пуста</div>';
+    return;
+  }
   el.innerHTML = payments.map(p => {
     const dt  = new Date(p.created_at * 1000).toLocaleDateString('ru-RU');
     const cls = p.status === 'paid' ? 'paid' : 'pending';
     const lbl = p.status === 'paid' ? '✅ Оплачено' : '⏳ Ожидает';
     return `<div class="pay-history-item">
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <div class="pay-history-name">${p.tariff_name || 'Тариф #'+p.tariff_id}</div>
-        <div class="pay-history-amount ${cls}">$${p.amount.toFixed(2)}</div>
+        <div class="pay-history-name">${p.tariff_name || 'Тариф #' + p.tariff_id}</div>
+        <div class="pay-history-amount ${cls}">$${(+p.amount).toFixed(2)}</div>
       </div>
       <div class="pay-history-meta">${dt} · ${lbl}</div>
     </div>`;
   }).join('');
 }
 
-/* ═══════════ ACTIONS ═══════════ */
+/* ═══════════════════════════════════════════════════════════════
+   ACTIONS
+═══════════════════════════════════════════════════════════════ */
 function getConfig() {
   sendData({ action: 'get_config' });
   showToast('📨 Конфиг отправляется в чат...');
@@ -786,11 +833,14 @@ function startPayment() {
 }
 
 function shareRef() {
-  if (tg?.shareUrl) tg.shareUrl(state.refLink, '🚀 Попробуй MrdotaVPN — быстрый VLESS Reality!');
-  else copyRef();
+  if (tg?.shareUrl) {
+    tg.shareUrl(state.refLink, '🚀 Попробуй MrdotaVPN — быстрый VLESS Reality!');
+  } else {
+    copyRef();
+  }
 }
 
-function copyRef() { copyText(state.refLink); showToast('🔗 Ссылка скопирована!'); }
+function copyRef()  { copyText(state.refLink); showToast('🔗 Ссылка скопирована!'); }
 
 function toggleWithdraw() {
   const f = document.getElementById('withdraw-form');
@@ -801,8 +851,8 @@ function submitWithdraw() {
   const amount = parseFloat(document.getElementById('withdraw-amount').value);
   const wallet = document.getElementById('withdraw-wallet').value.trim();
   if (!amount || amount < 5) { showToast('❌ Минимум $5.00'); return; }
-  if (amount > state.balance)   { showToast('❌ Недостаточно средств'); return; }
-  if (!wallet)                  { showToast('❌ Укажите кошелёк'); return; }
+  if (amount > state.balance) { showToast('❌ Недостаточно средств'); return; }
+  if (!wallet)                { showToast('❌ Укажите кошелёк'); return; }
   sendData({ action: 'referral_withdraw', amount, wallet });
   showToast('✅ Заявка отправлена!');
   document.getElementById('withdraw-form').style.display = 'none';
@@ -812,43 +862,64 @@ function showSettings() {
   switchTab('profile');
   const s = document.getElementById('settings-section');
   s.style.display = 'block';
-  setTimeout(() => s.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+  setTimeout(() => s.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 }
 
-function donate() { sendData({ action: 'donate' }); showToast('❤️ Спасибо!'); }
+function donate() {
+  sendData({ action: 'donate' });
+  showToast('❤️ Спасибо!');
+}
 
-/* ═══════════ HELPERS ═══════════ */
+/* ═══════════════════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════════════════ */
 function sendData(payload) {
-  if (tg?.sendData) tg.sendData(JSON.stringify(payload));
-  else console.log('[sendData]', payload);
+  if (tg?.sendData) {
+    tg.sendData(JSON.stringify(payload));
+  } else {
+    console.log('[sendData]', payload);
+    showToast('⚠️ Откройте через Telegram');
+  }
 }
 
 function copyText(text) {
-  if (navigator.clipboard) navigator.clipboard.writeText(text);
-  else {
-    const el = document.createElement('textarea');
-    el.value = text; document.body.appendChild(el);
-    el.select(); document.execCommand('copy');
-    document.body.removeChild(el);
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).catch(() => _fallbackCopy(text));
+  } else {
+    _fallbackCopy(text);
   }
+}
+
+function _fallbackCopy(text) {
+  const el = document.createElement('textarea');
+  el.value = text;
+  el.style.position = 'fixed';
+  el.style.opacity = '0';
+  document.body.appendChild(el);
+  el.select();
+  document.execCommand('copy');
+  document.body.removeChild(el);
 }
 
 let _toastTimer;
 function showToast(msg) {
   const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
+  el.textContent = msg;
+  el.classList.add('show');
   clearTimeout(_toastTimer);
   _toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
 }
 
-/* ═══════════ BOOT ═══════════ */
+/* ═══════════════════════════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════════════════════════ */
 async function init() {
   document.getElementById('loader-text').textContent = 'Загружаем профиль...';
   await Promise.all([loadProfile(), loadTariffs()]);
   setTimeout(() => {
     const el = document.getElementById('loading');
     el.classList.add('hide');
-    setTimeout(() => el.style.display = 'none', 400);
+    setTimeout(() => { el.style.display = 'none'; }, 400);
   }, 500);
 }
 
